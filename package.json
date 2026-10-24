@@ -1,0 +1,55 @@
+{
+  "name": "playwright-ts-bdd",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Automation Framework created using playwright with typescript and cucumber",
+  "main": "index.js",
+  "scripts": {
+    "test": "tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
+    "test:chrome": "cross-env BROWSER=chromium tsx node_modules/@cucumber/cucumber/bin/cucumber.js --parallel 4",
+    "test:firefox": "cross-env BROWSER=firefox tsx node_modules/@cucumber/cucumber/bin/cucumber.js --parallel 4",
+    "test:webkit": "cross-env BROWSER=webkit tsx node_modules/@cucumber/cucumber/bin/cucumber.js --parallel 4",
+    "test:mobile:ios": "cross-env BROWSER=webkit DEVICE=\"iPhone 15 Pro\" tsx node_modules/@cucumber/cucumber/bin/cucumber.js --parallel 4",
+    "test:mobile:android": "cross-env BROWSER=chromium DEVICE=\"Pixel 7\" tsx node_modules/@cucumber/cucumber/bin/cucumber.js --parallel 4",
+    "test:headed": "cross-env HEADLESS=false tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
+    "test:chrome:headed": "cross-env BROWSER=chromium HEADLESS=false tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
+    "test:firefox:headed": "cross-env BROWSER=firefox HEADLESS=false tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
+    "test:webkit:headed": "cross-env BROWSER=webkit HEADLESS=false tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
+    "test:chrome:smoke": "npx cross-env BROWSER=chromium tsx node_modules/@cucumber/cucumber/bin/cucumber.js --tags \"@smoke\"",
+    "test:chrome:negative": "npx cross-env BROWSER=chromium tsx node_modules/@cucumber/cucumber/bin/cucumber.js --tags \"@negative\" --parallel 4",
+    "test:chrome:checkout": "npx cross-env BROWSER=chromium tsx node_modules/@cucumber/cucumber/bin/cucumber.js --tags \"@checkout\"",
+    "test:chrome:checkout:headed": "npx cross-env BROWSER=chromium HEADLESS=false tsx node_modules/@cucumber/cucumber/bin/cucumber.js --tags \"@checkout\"",
+    "test:retry": "cross-env BROWSER=chromium tsx node_modules/@cucumber/cucumber/bin/cucumber.js --retry 2",
+    "test:ci": "cross-env BROWSER=chromium tsx node_modules/@cucumber/cucumber/bin/cucumber.js --parallel 4 --retry 2",
+    "test:dev": "cross-env ENV=dev tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
+    "test:qa": "cross-env ENV=qa tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
+    "test:staging": "cross-env ENV=staging tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
+    "test:local": "cross-env ENV=local tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
+    "test:qa:parallel": "cross-env ENV=qa tsx node_modules/@cucumber/cucumber/bin/cucumber.js --parallel 4",
+    "report": "node generate-report.cjs",
+    "test:report": "npm run test:chrome || npm run report"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sawone2893/playwright-ts-bdd.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sawone2893/playwright-ts-bdd/issues"
+  },
+  "homepage": "https://github.com/sawone2893/playwright-ts-bdd#readme",
+  "devDependencies": {
+    "@cucumber/cucumber": "^13.3.0",
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
+    "cross-env": "^10.1.0",
+    "multiple-cucumber-html-reporter": "^4.5.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.9"
+  }
+}

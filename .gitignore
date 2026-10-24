@@ -1,0 +1,6 @@
+node_modules/
+dist/
+reports/
+
+# Ignore local env files inside env folder
+env/.env*

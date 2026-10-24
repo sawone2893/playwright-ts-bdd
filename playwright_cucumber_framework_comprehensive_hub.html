@@ -1,0 +1,2414 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Playwright TS Cucumber BDD - Enterprise Framework Hub</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+            },
+            pw: {
+              green: '#2EAD33',
+              blue: '#207BE5',
+              purple: '#9B51E0'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+    ::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.6); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.9); }
+    
+    .code-glow {
+      box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.12);
+    }
+    .pulse-cursor {
+      animation: blink 1.2s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen transition-colors duration-200">
+
+  <!-- Toast Notification Container -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 flex items-center gap-3 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl font-mono text-xs">
+    <i class="fa-solid fa-circle-check text-base"></i>
+    <span id="toastMsg">Code copied to clipboard!</span>
+  </div>
+
+  <!-- Top Sticky Navigation Bar -->
+  <header class="sticky top-0 z-40 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-slate-950 font-black text-lg">
+          <i class="fa-solid fa-vial-circle-check"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">Playwright BDD Hub</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-mono font-medium">Enterprise v2.0</span>
+          </div>
+          <p class="text-xs text-slate-400 font-mono hidden sm:block">TypeScript • ESM • Parallel Workers • Extent HTML</p>
+        </div>
+      </div>
+
+      <!-- Center Search -->
+      <div class="relative w-48 sm:w-72 lg:w-96">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+        <input 
+          type="text" 
+          id="globalSearchInput" 
+          onkeyup="handleGlobalSearch(event)"
+          placeholder="Search files, errors, features (e.g. BasePage, ESM)..." 
+          class="w-full bg-slate-950/80 border border-slate-800 text-slate-200 text-xs rounded-xl pl-9 pr-3 py-2 focus:outline-none focus:border-emerald-500 font-mono placeholder-slate-500"
+        />
+      </div>
+
+      <!-- Right Actions -->
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <a href="#troubleshooting" class="hidden md:flex text-xs font-semibold px-3 py-1.5 rounded-lg text-amber-400 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition-colors items-center gap-1.5">
+          <i class="fa-solid fa-bug"></i> 8 Resolved Errors
+        </a>
+        <button id="themeToggleBtn" onclick="toggleTheme()" class="w-9 h-9 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 flex items-center justify-center transition-colors">
+          <i class="fa-solid fa-sun" id="themeIcon"></i>
+        </button>
+        <a href="#code-viewer" class="text-xs font-semibold px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-2 transition-all shadow-md shadow-emerald-600/20">
+          <i class="fa-solid fa-folder-tree"></i> <span class="hidden sm:inline">Files</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sticky Sub-Navigation Bar -->
+  <nav class="bg-slate-900/60 border-b border-slate-800/80 sticky top-16 z-30 backdrop-blur-sm hidden md:block">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center space-x-1 lg:space-x-3 py-2 text-xs font-medium text-slate-300 overflow-x-auto">
+      <a href="#architecture" class="px-3 py-1 rounded-md hover:text-emerald-400 hover:bg-slate-800 transition-colors flex items-center gap-1.5">
+        <i class="fa-solid fa-network-wired text-emerald-400"></i> Architecture
+      </a>
+      <a href="#code-viewer" class="px-3 py-1 rounded-md hover:text-emerald-400 hover:bg-slate-800 transition-colors flex items-center gap-1.5">
+        <i class="fa-solid fa-code text-cyan-400"></i> Code Repository (20 Files)
+      </a>
+      <a href="#troubleshooting" class="px-3 py-1 rounded-md hover:text-emerald-400 hover:bg-slate-800 transition-colors flex items-center gap-1.5">
+        <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> Troubleshooting Matrix
+      </a>
+      <a href="#terminal-simulator" class="px-3 py-1 rounded-md hover:text-emerald-400 hover:bg-slate-800 transition-colors flex items-center gap-1.5">
+        <i class="fa-solid fa-terminal text-purple-400"></i> Live CLI Terminal
+      </a>
+      <a href="#transformer-sandbox" class="px-3 py-1 rounded-md hover:text-emerald-400 hover:bg-slate-800 transition-colors flex items-center gap-1.5">
+        <i class="fa-solid fa-flask text-teal-400"></i> Transformers Sandbox
+      </a>
+      <a href="#report-preview" class="px-3 py-1 rounded-md hover:text-emerald-400 hover:bg-slate-800 transition-colors flex items-center gap-1.5">
+        <i class="fa-solid fa-chart-pie text-emerald-400"></i> Extent Report Dashboard
+      </a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden py-14 border-b border-slate-800 bg-gradient-to-b from-slate-900/60 via-slate-950 to-slate-950">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(16,185,129,0.18),rgba(255,255,255,0))]"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="text-center max-w-4xl mx-auto space-y-4">
+        
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs font-mono font-medium">
+          <i class="fa-solid fa-shield-halved"></i> Playwright + TypeScript + Cucumber BDD Architecture Master Hub
+        </div>
+
+        <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+          Enterprise Test Automation Engine with <span class="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">Native ESM & Parallel Threads</span>
+        </h1>
+        
+        <p class="text-slate-400 text-sm sm:text-base leading-relaxed max-w-3xl mx-auto">
+          Complete, end-to-end documentation of the BDD framework created in our sessions. Features centralized <code>BasePage</code> wrappers, thread-safe <code>CustomWorld</code>, storageState session caching, dynamic multi-environment configurations, and an Extent-grade reporting engine.
+        </p>
+
+        <!-- KPI Pill Matrix -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 font-mono text-left">
+          <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition-all">
+            <div class="text-[11px] text-slate-400">Browser Engines</div>
+            <div class="text-base font-bold text-white flex items-center gap-2 mt-1">
+              <i class="fa-brands fa-chrome text-amber-400"></i>
+              <i class="fa-brands fa-firefox text-orange-500"></i>
+              <i class="fa-brands fa-safari text-blue-400"></i>
+            </div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Chromium, Firefox, WebKit, Mobile</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition-all">
+            <div class="text-[11px] text-slate-400">Parallel Workers</div>
+            <div class="text-base font-bold text-emerald-400 mt-1">4 Isolated Threads</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Zero Cookie or Storage Clashes</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition-all">
+            <div class="text-[11px] text-slate-400">Auth Preservation</div>
+            <div class="text-base font-bold text-cyan-400 mt-1">storageState</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Skip Redundant UI Logins</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition-all">
+            <div class="text-[11px] text-slate-400">HTML Reporting</div>
+            <div class="text-base font-bold text-purple-400 mt-1">multiple-cucumber</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Extent-Grade Charts & Screenshots</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 1: INTERACTIVE ARCHITECTURE BLUEPRINT -->
+  <section id="architecture" class="py-14 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-8">
+        <div>
+          <span class="text-xs font-mono uppercase tracking-wider text-emerald-400 font-semibold">Architecture Specification</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Enterprise Test Lifecycle Flow</h2>
+          <p class="text-sm text-slate-400 mt-1">Click any layer in the execution pipeline to view its responsibility, isolation pattern, and design rationale.</p>
+        </div>
+        <div class="mt-3 md:mt-0 text-xs font-mono text-slate-400 flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span> Live Interactive Pipeline
+        </div>
+      </div>
+
+      <!-- Flow Layer Cards (Horizontal Scroll on Mobile) -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-6" id="archNodesList">
+        <!-- Node 0 -->
+        <button onclick="inspectArch(0)" class="arch-card text-left p-3.5 rounded-xl border border-emerald-500/50 bg-emerald-950/40 text-emerald-300 transition-all shadow-md shadow-emerald-900/20 group" data-idx="0">
+          <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs mb-2 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-file-signature"></i>
+          </div>
+          <div class="text-xs font-bold text-white truncate">1. Feature Files</div>
+          <div class="text-[10px] text-slate-400 font-mono">Gherkin Domain</div>
+        </button>
+
+        <!-- Node 1 -->
+        <button onclick="inspectArch(1)" class="arch-card text-left p-3.5 rounded-xl border border-slate-800 bg-slate-900/80 hover:border-slate-700 transition-all group" data-idx="1">
+          <div class="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs mb-2 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-code"></i>
+          </div>
+          <div class="text-xs font-bold text-white truncate">2. Steps & Types</div>
+          <div class="text-[10px] text-slate-400 font-mono">Step Bindings</div>
+        </button>
+
+        <!-- Node 2 -->
+        <button onclick="inspectArch(2)" class="arch-card text-left p-3.5 rounded-xl border border-slate-800 bg-slate-900/80 hover:border-slate-700 transition-all group" data-idx="2">
+          <div class="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs mb-2 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-globe"></i>
+          </div>
+          <div class="text-xs font-bold text-white truncate">3. Custom World</div>
+          <div class="text-[10px] text-slate-400 font-mono">Thread Isolation</div>
+        </button>
+
+        <!-- Node 3 -->
+        <button onclick="inspectArch(3)" class="arch-card text-left p-3.5 rounded-xl border border-slate-800 bg-slate-900/80 hover:border-slate-700 transition-all group" data-idx="3">
+          <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs mb-2 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-network-wired"></i>
+          </div>
+          <div class="text-xs font-bold text-white truncate">4. Browser Factory</div>
+          <div class="text-[10px] text-slate-400 font-mono">Matrix & Mobile</div>
+        </button>
+
+        <!-- Node 4 -->
+        <button onclick="inspectArch(4)" class="arch-card text-left p-3.5 rounded-xl border border-slate-800 bg-slate-900/80 hover:border-slate-700 transition-all group" data-idx="4">
+          <div class="w-7 h-7 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center text-xs mb-2 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-cubes"></i>
+          </div>
+          <div class="text-xs font-bold text-white truncate">5. BasePage</div>
+          <div class="text-[10px] text-slate-400 font-mono">Central Wrapper</div>
+        </button>
+
+        <!-- Node 5 -->
+        <button onclick="inspectArch(5)" class="arch-card text-left p-3.5 rounded-xl border border-slate-800 bg-slate-900/80 hover:border-slate-700 transition-all group" data-idx="5">
+          <div class="w-7 h-7 rounded-lg bg-pink-500/20 text-pink-400 flex items-center justify-center text-xs mb-2 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-sitemap"></i>
+          </div>
+          <div class="text-xs font-bold text-white truncate">6. Page Objects</div>
+          <div class="text-[10px] text-slate-400 font-mono">Business POMs</div>
+        </button>
+
+        <!-- Node 6 -->
+        <button onclick="inspectArch(6)" class="arch-card text-left p-3.5 rounded-xl border border-slate-800 bg-slate-900/80 hover:border-slate-700 transition-all group" data-idx="6">
+          <div class="w-7 h-7 rounded-lg bg-teal-500/20 text-teal-400 flex items-center justify-center text-xs mb-2 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <div class="text-xs font-bold text-white truncate">7. Extent Report</div>
+          <div class="text-[10px] text-slate-400 font-mono">HTML + Screen</div>
+        </button>
+      </div>
+
+      <!-- Detail Showcase Card -->
+      <div id="archDetailShowcase" class="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 relative">
+        <!-- Rendered via JS -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION 2: FULL PROJECT BLUEPRINT & INTERACTIVE CODE EXPLORER -->
+  <section id="code-viewer" class="py-14 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-8">
+        <div>
+          <span class="text-xs font-mono uppercase tracking-wider text-emerald-400 font-semibold">Repository Blueprint</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Full Source Workspace Explorer</h2>
+          <p class="text-sm text-slate-400 mt-1">Every configuration, support wrapper, model, page object, feature, and step definition implemented in this framework.</p>
+        </div>
+        <div class="mt-4 md:mt-0 flex items-center gap-2">
+          <button onclick="copyCurrentFileCode()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-2 transition-all shadow-md shadow-emerald-600/20">
+            <i class="fa-regular fa-copy" id="copyIcon"></i> <span id="copyText">Copy Source Code</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Workspace Container -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-slate-900/50 border border-slate-800 rounded-2xl p-4 lg:p-6">
+        
+        <!-- File Tree Sidebar (4 Cols) -->
+        <div class="lg:col-span-4 bg-slate-950/80 rounded-xl border border-slate-800 p-4 font-mono text-xs overflow-y-auto max-h-[680px]">
+          <div class="text-slate-400 uppercase text-[10px] tracking-wider mb-3 px-2 font-semibold flex items-center justify-between">
+            <span>Project Explorer (20 Files)</span>
+            <span class="text-emerald-400">TypeScript ESM</span>
+          </div>
+
+          <div class="space-y-1">
+            
+            <!-- features/ folder -->
+            <div class="text-slate-300 font-medium py-1 px-2 flex items-center gap-2">
+              <i class="fa-regular fa-folder-open text-amber-400"></i> features/
+            </div>
+            <div class="pl-4 space-y-0.5">
+              <button onclick="openFile('login.feature')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-300 active" data-id="login.feature">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-file text-emerald-400"></i> login.feature</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">BDD</span>
+              </button>
+              <button onclick="openFile('checkout.feature')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="checkout.feature">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-file text-emerald-400"></i> checkout.feature</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">Table</span>
+              </button>
+            </div>
+
+            <!-- src/pages/ folder -->
+            <div class="text-slate-300 font-medium py-1 px-2 flex items-center gap-2 mt-2">
+              <i class="fa-regular fa-folder-open text-amber-400"></i> src/pages/
+            </div>
+            <div class="pl-4 space-y-0.5">
+              <button onclick="openFile('BasePage.ts')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="BasePage.ts">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-js text-blue-400"></i> BasePage.ts</span>
+                <span class="text-[9px] bg-emerald-500/20 text-emerald-300 px-1 rounded">Core</span>
+              </button>
+              <button onclick="openFile('LoginPage.ts')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="LoginPage.ts">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-js text-blue-400"></i> LoginPage.ts</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">POM</span>
+              </button>
+              <button onclick="openFile('InventoryPage.ts')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="InventoryPage.ts">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-js text-blue-400"></i> InventoryPage.ts</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">POM</span>
+              </button>
+              <button onclick="openFile('CheckoutPage.ts')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="CheckoutPage.ts">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-js text-blue-400"></i> CheckoutPage.ts</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">POM</span>
+              </button>
+            </div>
+
+            <!-- src/steps/ folder -->
+            <div class="text-slate-300 font-medium py-1 px-2 flex items-center gap-2 mt-2">
+              <i class="fa-regular fa-folder-open text-amber-400"></i> src/steps/
+            </div>
+            <div class="pl-4 space-y-0.5">
+              <button onclick="openFile('login.steps.ts')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="login.steps.ts">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-js text-blue-400"></i> login.steps.ts</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">Steps</span>
+              </button>
+              <button onclick="openFile('checkout.steps.ts')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="checkout.steps.ts">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-js text-blue-400"></i> checkout.steps.ts</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">Steps</span>
+              </button>
+              <button onclick="openFile('auth.steps.ts')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="auth.steps.ts">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-js text-blue-400"></i> auth.steps.ts</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">ParamTypes</span>
+              </button>
+            </div>
+
+            <!-- src/support/ folder -->
+            <div class="text-slate-300 font-medium py-1 px-2 flex items-center gap-2 mt-2">
+              <i class="fa-regular fa-folder-open text-amber-400"></i> src/support/
+            </div>
+            <div class="pl-4 space-y-0.5">
+              <button onclick="openFile('browser-factory.ts')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="browser-factory.ts">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-js text-blue-400"></i> browser-factory.ts</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">Matrix</span>
+              </button>
+              <button onclick="openFile('custom-world.ts')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="custom-world.ts">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-js text-blue-400"></i> custom-world.ts</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">World</span>
+              </button>
+              <button onclick="openFile('hooks.ts')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="hooks.ts">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-js text-blue-400"></i> hooks.ts</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">Hooks</span>
+              </button>
+              <button onclick="openFile('config.ts')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="config.ts">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-js text-blue-400"></i> config.ts</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">Config</span>
+              </button>
+              <button onclick="openFile('auth-setup.ts')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="auth-setup.ts">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-js text-blue-400"></i> auth-setup.ts</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">Auth</span>
+              </button>
+              <button onclick="openFile('parameter-types.ts')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="parameter-types.ts">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-js text-blue-400"></i> parameter-types.ts</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">Tokens</span>
+              </button>
+              <button onclick="openFile('data-table-types.ts')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="data-table-types.ts">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-js text-blue-400"></i> data-table-types.ts</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">Tables</span>
+              </button>
+            </div>
+
+            <!-- src/models/ folder -->
+            <div class="text-slate-300 font-medium py-1 px-2 flex items-center gap-2 mt-2">
+              <i class="fa-regular fa-folder-open text-amber-400"></i> src/models/
+            </div>
+            <div class="pl-4 space-y-0.5">
+              <button onclick="openFile('checkout.model.ts')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="checkout.model.ts">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-js text-blue-400"></i> checkout.model.ts</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">Types</span>
+              </button>
+              <button onclick="openFile('user.model.ts')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="user.model.ts">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-js text-blue-400"></i> user.model.ts</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">Types</span>
+              </button>
+            </div>
+
+            <!-- env/ folder -->
+            <div class="text-slate-300 font-medium py-1 px-2 flex items-center gap-2 mt-2">
+              <i class="fa-regular fa-folder-open text-amber-400"></i> env/
+            </div>
+            <div class="pl-4 space-y-0.5">
+              <button onclick="openFile('.env.qa')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id=".env.qa">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-gear text-emerald-400"></i> .env.qa</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">QA</span>
+              </button>
+              <button onclick="openFile('.env.dev')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id=".env.dev">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-gear text-emerald-400"></i> .env.dev</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">Dev</span>
+              </button>
+              <button onclick="openFile('.env.staging')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id=".env.staging">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-gear text-emerald-400"></i> .env.staging</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">Stage</span>
+              </button>
+            </div>
+
+            <!-- Root Configs -->
+            <div class="text-slate-300 font-medium py-1 px-2 flex items-center gap-2 mt-2">
+              <i class="fa-solid fa-sliders text-slate-400"></i> Root System Configs
+            </div>
+            <div class="pl-4 space-y-0.5">
+              <button onclick="openFile('package.json')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="package.json">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-npm text-red-400"></i> package.json</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">ESM</span>
+              </button>
+              <button onclick="openFile('cucumber.json')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="cucumber.json">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-file-code text-green-400"></i> cucumber.json</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">Parallel</span>
+              </button>
+              <button onclick="openFile('tsconfig.json')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="tsconfig.json">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-file-code text-blue-400"></i> tsconfig.json</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">TS 5+</span>
+              </button>
+              <button onclick="openFile('generate-report.cjs')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id="generate-report.cjs">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-node-js text-green-500"></i> generate-report.cjs</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">CJS</span>
+              </button>
+              <button onclick="openFile('.gitignore')" class="file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 flex items-center justify-between text-slate-400" data-id=".gitignore">
+                <span class="flex items-center gap-2"><i class="fa-brands fa-git-alt text-orange-500"></i> .gitignore</span>
+                <span class="text-[9px] bg-slate-800 text-slate-400 px-1 rounded">Git</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Code Content Area (8 Cols) -->
+        <div class="lg:col-span-8 bg-slate-950 rounded-xl border border-slate-800 flex flex-col overflow-hidden max-h-[680px]">
+          
+          <!-- Code Title Bar -->
+          <div class="h-10 bg-slate-900 border-b border-slate-800 px-4 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-yellow-500/80 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-green-500/80 inline-block"></span>
+              <span class="text-xs text-slate-300 font-mono ml-2 flex items-center gap-1.5" id="codeFilePath">
+                <i class="fa-regular fa-file-code text-emerald-400"></i> features/login.feature
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400" id="codeFileBadge">Gherkin BDD</span>
+            </div>
+          </div>
+
+          <!-- Pre Code Block -->
+          <div class="flex-1 p-4 overflow-auto font-mono text-xs leading-relaxed text-slate-300 bg-[#090d16]">
+            <pre><code id="codeTextOutput"></code></pre>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION 3: EXHAUSTIVE TROUBLESHOOTING & ROOT CAUSE MATRIX -->
+  <section id="troubleshooting" class="py-14 border-b border-slate-800 bg-slate-950/60">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="mb-8">
+        <span class="text-xs font-mono uppercase tracking-wider text-amber-400 font-semibold flex items-center gap-2">
+          <i class="fa-solid fa-bug"></i> Post-Mortem Engineering Log
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Troubleshooting & Root Cause Analysis Matrix</h2>
+        <p class="text-sm text-slate-400 mt-1">Detailed analysis of every compilation, runtime, ESM, and cross-platform error encountered in our setup and their verified permanent resolutions.</p>
+      </div>
+
+      <!-- Error Filter Tabs -->
+      <div class="flex flex-wrap gap-2 mb-6" id="troubleFilterButtons">
+        <button onclick="filterTroubleshooting('all')" class="trouble-tab active px-3.5 py-1.5 rounded-lg text-xs font-mono bg-emerald-600/20 text-emerald-400 border border-emerald-500/30">
+          All (8 Issues)
+        </button>
+        <button onclick="filterTroubleshooting('esm')" class="trouble-tab px-3.5 py-1.5 rounded-lg text-xs font-mono bg-slate-900 text-slate-400 hover:text-white border border-slate-800">
+          ESM / Node Module
+        </button>
+        <button onclick="filterTroubleshooting('ts')" class="trouble-tab px-3.5 py-1.5 rounded-lg text-xs font-mono bg-slate-900 text-slate-400 hover:text-white border border-slate-800">
+          TypeScript Compiler
+        </button>
+        <button onclick="filterTroubleshooting('os')" class="trouble-tab px-3.5 py-1.5 rounded-lg text-xs font-mono bg-slate-900 text-slate-400 hover:text-white border border-slate-800">
+          Windows OS & Shell
+        </button>
+      </div>
+
+      <!-- Troubleshooting Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="troubleshootingGrid">
+        <!-- Rendered via JS -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION 4: INTERACTIVE CLI RUNNER SIMULATOR -->
+  <section id="terminal-simulator" class="py-14 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-8">
+        <div>
+          <span class="text-xs font-mono uppercase tracking-wider text-purple-400 font-semibold">Interactive Shell</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Execution CLI Terminal Simulator</h2>
+          <p class="text-sm text-slate-400 mt-1">Simulate parallel headless runs, single-worker headed debugging, mobile WebKit emulation, and auto-retry flows.</p>
+        </div>
+      </div>
+
+      <!-- Terminal Window -->
+      <div class="rounded-2xl border border-slate-800 bg-slate-950 overflow-hidden shadow-2xl code-glow">
+        
+        <!-- Controls Bar -->
+        <div class="p-3 bg-slate-900/90 border-b border-slate-800 flex flex-wrap items-center gap-2">
+          <span class="text-xs font-mono text-slate-400 mr-2 flex items-center gap-1.5">
+            <i class="fa-solid fa-terminal text-emerald-400"></i> Command Presets:
+          </span>
+          <button onclick="triggerTerminal('parallel')" class="px-3 py-1.5 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-500/40 text-emerald-300 text-xs font-mono transition-colors">
+            npm run test:report (Chrome 4-Workers)
+          </button>
+          <button onclick="triggerTerminal('headed')" class="px-3 py-1.5 rounded-lg bg-cyan-600/30 hover:bg-cyan-600/50 border border-cyan-500/40 text-cyan-300 text-xs font-mono transition-colors">
+            npm run test:chrome:headed (Visible UI)
+          </button>
+          <button onclick="triggerTerminal('mobile')" class="px-3 py-1.5 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 border border-purple-500/40 text-purple-300 text-xs font-mono transition-colors">
+            npm run test:mobile:ios (iPhone 15 WebKit)
+          </button>
+          <button onclick="triggerTerminal('env')" class="px-3 py-1.5 rounded-lg bg-teal-600/30 hover:bg-teal-600/50 border border-teal-500/40 text-teal-300 text-xs font-mono transition-colors">
+            npm run test:dev (Dynamic ENV)
+          </button>
+          <button onclick="triggerTerminal('retry')" class="px-3 py-1.5 rounded-lg bg-amber-600/30 hover:bg-amber-600/50 border border-amber-500/40 text-amber-300 text-xs font-mono transition-colors">
+            npm run test:retry (Auto-Retry)
+          </button>
+          <button onclick="resetTerminal()" class="ml-auto px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 text-xs font-mono">
+            <i class="fa-solid fa-rotate-left mr-1"></i> Clear
+          </button>
+        </div>
+
+        <!-- Terminal Output View -->
+        <div id="terminalStream" class="p-4 sm:p-6 font-mono text-xs text-slate-300 h-96 overflow-y-auto space-y-1.5 bg-[#070b14]">
+          <div class="text-slate-500 font-medium">Enterprise Playwright TS BDD Terminal [PowerShell / Bash Wrapper]</div>
+          <div class="text-slate-500">Node v22.12.0 • Playwright v1.49.0 • Cucumber-JS v10.8.0</div>
+          <div class="text-slate-600 pt-1">Select any preset above to execute simulated parallel test suites...</div>
+          <div class="flex items-center gap-2 pt-2 text-emerald-400">
+            <span>dev@enterprise-bdd:~/playwright-ts-bdd$</span>
+            <span class="inline-block w-2 h-4 bg-emerald-400 pulse-cursor"></span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION 5: INTERACTIVE TRANSFORMER & PARAMETERTYPE SANDBOX -->
+  <section id="transformer-sandbox" class="py-14 border-b border-slate-800 bg-slate-950/40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="mb-8">
+        <span class="text-xs font-mono uppercase tracking-wider text-teal-400 font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-flask"></i> Interactive BDD Sandbox
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Live ParameterType & DataTable Tester</h2>
+        <p class="text-sm text-slate-400 mt-1">Experiment with live Cucumber token expressions and DataTable transformations in real-time.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Parameter Type Tester -->
+        <div class="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-tags text-cyan-400"></i> ParameterType Expression Evaluator
+            </h3>
+            <span class="text-[10px] font-mono bg-cyan-500/10 text-cyan-400 px-2 py-0.5 rounded">defineParameterType</span>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label class="text-xs text-slate-400 font-mono">Select Token & Sample Input:</label>
+              <div class="grid grid-cols-3 gap-2 mt-1.5">
+                <button onclick="testParameter('user', 'standard')" class="param-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-200">
+                  {userRole} standard
+                </button>
+                <button onclick="testParameter('duration', '3 seconds')" class="param-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-200">
+                  {duration} 3 seconds
+                </button>
+                <button onclick="testParameter('boolean', 'visible')" class="param-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-200">
+                  {booleanState} visible
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label class="text-xs text-slate-400 font-mono">Matched Expression Pattern:</label>
+              <input type="text" id="paramPatternInput" readonly value="Given the {userRole} logs into the platform" class="w-full mt-1 bg-slate-950 border border-slate-800 text-emerald-400 text-xs rounded-lg px-3 py-2 font-mono" />
+            </div>
+
+            <div>
+              <label class="text-xs text-slate-400 font-mono">Transformed TypeScript Injected Object:</label>
+              <div class="mt-1 p-3 rounded-lg bg-slate-950 border border-slate-800 font-mono text-xs text-amber-300 overflow-x-auto min-h-[90px]" id="paramJsonOutput">
+                // Click a token above to evaluate transformation
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DataTable Converter Tester -->
+        <div class="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-table text-teal-400"></i> DataTable Converter Evaluator
+            </h3>
+            <span class="text-[10px] font-mono bg-teal-500/10 text-teal-400 px-2 py-0.5 rounded">defineDataTableType</span>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label class="text-xs text-slate-400 font-mono">Select Table Format:</label>
+              <div class="grid grid-cols-2 gap-2 mt-1.5">
+                <button onclick="testTableType('products')" class="table-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-200">
+                  Tabular -> ProductItem[]
+                </button>
+                <button onclick="testTableType('shipping')" class="table-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-200">
+                  Key-Value -> ShippingInfo
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label class="text-xs text-slate-400 font-mono">Gherkin Raw Text:</label>
+              <div class="mt-1 p-2.5 rounded-lg bg-slate-950 border border-slate-800 font-mono text-[11px] text-emerald-300 whitespace-pre" id="tableRawInput">
+| productName         | quantity |
+| Sauce Labs Backpack | 1        |
+| Sauce Labs Bike Light | 2      |
+              </div>
+            </div>
+
+            <div>
+              <label class="text-xs text-slate-400 font-mono">Auto-Transformed Strongly Typed Model:</label>
+              <div class="mt-1 p-3 rounded-lg bg-slate-950 border border-slate-800 font-mono text-xs text-cyan-300 overflow-x-auto min-h-[90px]" id="tableJsonOutput">
+                // Output model will appear here
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECTION 6: LIVE EXTENT-STYLE HTML REPORT PREVIEW -->
+  <section id="report-preview" class="py-14">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-8">
+        <div>
+          <span class="text-xs font-mono uppercase tracking-wider text-emerald-400 font-semibold flex items-center gap-1.5">
+            <i class="fa-solid fa-chart-pie"></i> Reporting Engine Output
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Multiple Cucumber HTML Report Dashboard</h2>
+          <p class="text-sm text-slate-400 mt-1">Live simulation of <code>multiple-cucumber-html-reporter</code> featuring pass/fail telemetry, scenario breakdowns, and screenshot attachments.</p>
+        </div>
+        <div class="mt-4 md:mt-0 flex items-center gap-2">
+          <span class="text-xs px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono">
+            <i class="fa-solid fa-circle-check mr-1"></i> Pass Rate: 91.6% (11/12)
+          </span>
+        </div>
+      </div>
+
+      <!-- Live Mock Dashboard -->
+      <div class="bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+        
+        <!-- Header Banner -->
+        <div class="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border-b border-slate-800 p-4 sm:p-6 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-slate-950 text-xl font-bold">
+              <i class="fa-solid fa-chart-column"></i>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-white">Execution Dashboard - SauceDemo Suite</h3>
+              <p class="text-xs text-slate-400 font-mono">Environment: QA • Engine: Chromium 130.0 • Parallel: 4 Workers</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2 font-mono text-xs">
+            <div class="bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
+              <span class="text-slate-400">Total Scenarios:</span> <strong class="text-white">12</strong>
+            </div>
+            <div class="bg-emerald-950/60 text-emerald-400 border border-emerald-800/60 px-3 py-1.5 rounded-lg">
+              <span>Passed:</span> <strong>11</strong>
+            </div>
+            <div class="bg-red-950/60 text-red-400 border border-red-800/60 px-3 py-1.5 rounded-lg">
+              <span>Failed:</span> <strong>1</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metric Stat Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 p-4 sm:p-6 border-b border-slate-800/80 bg-slate-900/30">
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800">
+            <div class="text-xs text-slate-400 font-mono">Total Execution Time</div>
+            <div class="text-xl font-bold text-white mt-1">14.32s</div>
+            <div class="text-[11px] text-emerald-400 mt-0.5"><i class="fa-solid fa-bolt"></i> Speedup: 4.2x with workers</div>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800">
+            <div class="text-xs text-slate-400 font-mono">Browser Contexts</div>
+            <div class="text-xl font-bold text-cyan-400 mt-1">12 Created</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">Isolated cookies & cache per test</div>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800">
+            <div class="text-xs text-slate-400 font-mono">Total Steps Run</div>
+            <div class="text-xl font-bold text-white mt-1">48 / 49 <span class="text-xs text-slate-400 font-normal">Passed</span></div>
+            <div class="text-[11px] text-emerald-400 mt-0.5">97.9% Step Success Rate</div>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800">
+            <div class="text-xs text-slate-400 font-mono">Attached Artifacts</div>
+            <div class="text-xl font-bold text-amber-400 mt-1">1 Screenshot</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">Captured in After(scenario) Hook</div>
+          </div>
+        </div>
+
+        <!-- Scenario Table Filter Controls -->
+        <div class="p-4 sm:p-6 border-b border-slate-800/60 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <button onclick="filterReportScenarios('all')" class="rep-filter active px-3 py-1 rounded-lg text-xs font-mono bg-slate-800 text-white border border-slate-700">All (4)</button>
+            <button onclick="filterReportScenarios('passed')" class="rep-filter px-3 py-1 rounded-lg text-xs font-mono bg-slate-900 text-slate-400 hover:text-white border border-slate-800">Passed (3)</button>
+            <button onclick="filterReportScenarios('failed')" class="rep-filter px-3 py-1 rounded-lg text-xs font-mono bg-slate-900 text-slate-400 hover:text-white border border-slate-800">Failed (1)</button>
+          </div>
+          <span class="text-xs font-mono text-slate-400">Click failed scenario to view attached screenshot</span>
+        </div>
+
+        <!-- Scenario List -->
+        <div class="p-4 sm:p-6 space-y-3" id="reportScenarioList">
+          
+          <!-- Scenario 1 (Passed) -->
+          <div class="scenario-item passed p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-check"></i>
+              </span>
+              <div>
+                <div class="text-sm font-semibold text-white">Standard user login validation</div>
+                <div class="text-xs text-slate-400 font-mono">features/login.feature:9 • Tags: @auth @smoke @positive</div>
+              </div>
+            </div>
+            <div class="text-right font-mono text-xs">
+              <span class="text-slate-400">1.42s</span>
+              <span class="ml-3 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-semibold">PASSED</span>
+            </div>
+          </div>
+
+          <!-- Scenario 2 (Passed Table) -->
+          <div class="scenario-item passed p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-check"></i>
+              </span>
+              <div>
+                <div class="text-sm font-semibold text-white">Complete end-to-end checkout with multiple items (DataTable)</div>
+                <div class="text-xs text-slate-400 font-mono">features/checkout.feature:10 • Tags: @checkout @e2e @smoke</div>
+              </div>
+            </div>
+            <div class="text-right font-mono text-xs">
+              <span class="text-slate-400">3.18s</span>
+              <span class="ml-3 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-semibold">PASSED</span>
+            </div>
+          </div>
+
+          <!-- Scenario 3 (Failed with Screenshot Button) -->
+          <div class="scenario-item failed p-3.5 rounded-xl bg-red-950/20 border border-red-900/40 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <span class="w-6 h-6 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-xmark"></i>
+              </span>
+              <div>
+                <div class="text-sm font-semibold text-white">Failed login with invalid or missing credentials (locked_out_user)</div>
+                <div class="text-xs text-red-400/80 font-mono">features/login.feature:18 • Tags: @negative</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 font-mono text-xs">
+              <button onclick="openScreenshotModal()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 transition-colors">
+                <i class="fa-solid fa-camera text-amber-400"></i> Screenshot
+              </button>
+              <span class="text-slate-400">1.88s</span>
+              <span class="px-2 py-0.5 rounded bg-red-500/20 text-red-300 font-semibold">FAILED</span>
+            </div>
+          </div>
+
+          <!-- Scenario 4 (Passed StorageState) -->
+          <div class="scenario-item passed p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-key"></i>
+              </span>
+              <div>
+                <div class="text-sm font-semibold text-white">Access dashboard directly with pre-authenticated state (Auth Bypass)</div>
+                <div class="text-xs text-slate-400 font-mono">features/inventory.feature:4 • Tags: @authenticated</div>
+              </div>
+            </div>
+            <div class="text-right font-mono text-xs">
+              <span class="text-slate-400">0.94s</span>
+              <span class="ml-3 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-semibold">PASSED</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Attached Screenshot Modal Lightbox -->
+  <div id="screenshotModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+        <div>
+          <h4 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> Auto-Captured Failure Screenshot
+          </h4>
+          <p class="text-xs text-slate-400 font-mono">Attached via After(scenario) Hook in src/support/hooks.ts</p>
+        </div>
+        <button onclick="closeScreenshotModal()" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Rendered Simulated Browser Viewport -->
+      <div class="rounded-xl border border-slate-800 bg-slate-950 p-4 space-y-3">
+        <div class="h-6 bg-slate-800 rounded flex items-center px-3 text-[11px] font-mono text-slate-400">
+          https://www.saucedemo.com/ (Viewport: 1920x1080)
+        </div>
+        <div class="p-6 bg-slate-900/80 rounded-lg border border-red-500/40 text-center space-y-2">
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-500/20 text-red-400 text-xl">
+            <i class="fa-solid fa-circle-exclamation"></i>
+          </div>
+          <div class="text-sm font-bold text-red-400 font-mono">Epic sadface: Sorry, this user has been locked out.</div>
+          <p class="text-xs text-slate-400 max-w-sm mx-auto">Assertion failed: Expected element '[data-test="error"]' to match expected error string.</p>
+        </div>
+      </div>
+
+      <div class="mt-4 flex items-center justify-between text-xs text-slate-400 font-mono">
+        <span>Path: reports/screenshots/Failed_login_with_invalid.png</span>
+        <button onclick="closeScreenshotModal()" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-medium">Close Modal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 bg-slate-950 py-10 text-center text-xs text-slate-500 font-mono">
+    <div class="max-w-7xl mx-auto px-4 space-y-2">
+      <p>Playwright + TypeScript + Cucumber BDD Enterprise Automation Framework</p>
+      <p class="text-[11px] text-slate-600">Built with Single-File Native Web Architecture • Compatible with Node 20+, Playwright 1.49+, and Cucumber 10.8+</p>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT LOGIC & COMPLETE REPOSITORY STORE -->
+  <script>
+    /* =========================================================================
+       1. COMPLETE REPOSITORY FILE STORE (Full source codes for all 20 files)
+       ========================================================================= */
+    const CODE_REPOSITORY = {
+      "package.json": {
+        path: "package.json",
+        badge: "ESM + Scripts Config",
+        code: `{
+  "name": "playwright-ts-bdd",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Enterprise Playwright TypeScript Cucumber BDD Framework",
+  "scripts": {
+    "test": "tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
+    "test:chrome": "cross-env BROWSER=chromium tsx node_modules/@cucumber/cucumber/bin/cucumber.js --parallel 4",
+    "test:firefox": "cross-env BROWSER=firefox tsx node_modules/@cucumber/cucumber/bin/cucumber.js --parallel 4",
+    "test:webkit": "cross-env BROWSER=webkit tsx node_modules/@cucumber/cucumber/bin/cucumber.js --parallel 4",
+    "test:chrome:headed": "cross-env BROWSER=chromium HEADLESS=false tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
+    "test:mobile:ios": "cross-env BROWSER=webkit DEVICE=\\"iPhone 15 Pro\\" tsx node_modules/@cucumber/cucumber/bin/cucumber.js --parallel 4",
+    "test:mobile:android": "cross-env BROWSER=chromium DEVICE=\\"Pixel 7\\" tsx node_modules/@cucumber/cucumber/bin/cucumber.js --parallel 4",
+    "test:dev": "cross-env ENV=dev tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
+    "test:qa": "cross-env ENV=qa tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
+    "test:staging": "cross-env ENV=staging tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
+    "test:retry": "cross-env BROWSER=chromium tsx node_modules/@cucumber/cucumber/bin/cucumber.js --retry 2",
+    "report": "node generate-report.cjs",
+    "test:report": "npm run test:chrome || npm run report"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^10.8.0",
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.12.0",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.4.5",
+    "multiple-cucumber-html-reporter": "^3.7.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}`
+      },
+
+      "tsconfig.json": {
+        path: "tsconfig.json",
+        badge: "TypeScript Config",
+        code: `{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "rootDir": "./",
+    "outDir": "./dist",
+    "types": ["node"],
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true
+  },
+  "include": ["src/**/*", "features/**/*"]
+}`
+      },
+
+      "cucumber.json": {
+        path: "cucumber.json",
+        badge: "Cucumber Config",
+        code: `{
+  "default": {
+    "paths": ["features/**/*.feature"],
+    "import": [
+      "src/steps/**/*.ts",
+      "src/support/**/*.ts"
+    ],
+    "format": [
+      "summary",
+      "json:reports/cucumber-report.json"
+    ],
+    "parallel": 4,
+    "retry": 2
+  }
+}`
+      },
+
+      "generate-report.cjs": {
+        path: "generate-report.cjs",
+        badge: "CommonJS HTML Reporter",
+        code: `const report = require('multiple-cucumber-html-reporter');
+const os = require('os');
+
+const browserName = process.env.BROWSER || 'chromium';
+const deviceName = process.env.DEVICE || 'Desktop (1920x1080)';
+const activeEnv = process.env.ENV || 'qa';
+
+report.generate({
+  jsonDir: './reports',
+  reportPath: './reports/html-report',
+  metadata: {
+    browser: {
+      name: browserName.toUpperCase(),
+      version: 'Latest',
+    },
+    device: deviceName,
+    platform: {
+      name: os.platform(),
+      version: os.release(),
+    },
+  },
+  customData: {
+    title: 'Run Execution Matrix',
+    data: [
+      { label: 'Environment', value: activeEnv.toUpperCase() },
+      { label: 'Target Browser', value: browserName },
+      { label: 'Device Profile', value: deviceName },
+      { label: 'Parallel Workers', value: '4 Isolated Threads' },
+    ],
+  },
+});`
+      },
+
+      ".gitignore": {
+        path: ".gitignore",
+        badge: "Git Rules",
+        code: `node_modules/
+dist/
+reports/
+reports/auth/
+
+env/.env*
+!env/.env.example`
+      },
+
+      ".env.qa": {
+        path: "env/.env.qa",
+        badge: "QA Configuration",
+        code: `ENV=qa
+BASE_URL=https://www.saucedemo.com
+API_BASE_URL=https://api.qa.saucedemo.com
+BROWSER=chromium
+HEADLESS=true
+TIMEOUT=60000
+PARALLEL=4
+RETRY=1
+SLOW_MO=0
+
+# Role-Based User Credentials
+STANDARD_USERNAME=standard_user
+STANDARD_PASSWORD=secret_sauce
+LOCKED_OUT_USERNAME=locked_out_user
+LOCKED_OUT_PASSWORD=secret_sauce
+ADMIN_USERNAME=admin_qa
+ADMIN_PASSWORD=admin_secret_qa
+AUTH_BEARER_TOKEN=qa_token_abc123xyz`
+      },
+
+      ".env.dev": {
+        path: "env/.env.dev",
+        badge: "Dev Configuration",
+        code: `ENV=dev
+BASE_URL=https://dev.saucedemo.com
+API_BASE_URL=https://api.dev.saucedemo.com
+BROWSER=chromium
+HEADLESS=true
+TIMEOUT=30000
+PARALLEL=2
+RETRY=1
+SLOW_MO=0
+
+STANDARD_USERNAME=standard_dev_user
+STANDARD_PASSWORD=dev_secret_pass
+LOCKED_OUT_USERNAME=locked_out_dev
+LOCKED_OUT_PASSWORD=dev_secret_pass
+ADMIN_USERNAME=admin_dev
+ADMIN_PASSWORD=admin_secret_dev
+AUTH_BEARER_TOKEN=dev_token_987654321`
+      },
+
+      ".env.staging": {
+        path: "env/.env.staging",
+        badge: "Staging Configuration",
+        code: `ENV=staging
+BASE_URL=https://staging.saucedemo.com
+API_BASE_URL=https://api.staging.saucedemo.com
+BROWSER=chromium
+HEADLESS=true
+TIMEOUT=60000
+PARALLEL=4
+RETRY=2
+SLOW_MO=0
+
+STANDARD_USERNAME=standard_stage_user
+STANDARD_PASSWORD=stage_secret_pass
+LOCKED_OUT_USERNAME=locked_out_stage
+LOCKED_OUT_PASSWORD=stage_secret_pass
+ADMIN_USERNAME=admin_stage
+ADMIN_PASSWORD=admin_secret_stage
+AUTH_BEARER_TOKEN=stage_token_555777999`
+      },
+
+      "config.ts": {
+        path: "src/support/config.ts",
+        badge: "Typed Environment Config",
+        code: `import * as dotenv from 'dotenv';
+import * as path from 'path';
+import * as fs from 'fs';
+
+export type Environment = 'dev' | 'qa' | 'staging' | 'prod' | 'local';
+export type BrowserType = 'chromium' | 'firefox' | 'webkit';
+
+const activeEnv: Environment = (process.env.ENV as Environment) || 'qa';
+
+const rootDir = process.cwd();
+const envDirPath = path.resolve(rootDir, 'env');
+const baseEnvPath = path.resolve(envDirPath, '.env');
+const targetEnvPath = path.resolve(envDirPath, \`.env.\${activeEnv}\`);
+
+if (fs.existsSync(baseEnvPath)) {
+  dotenv.config({ path: baseEnvPath });
+}
+
+if (fs.existsSync(targetEnvPath)) {
+  dotenv.config({ path: targetEnvPath, override: true });
+}
+
+export interface UserCredentials {
+  username: string;
+  password: string;
+}
+
+export interface AppConfig {
+  env: Environment;
+  baseUrl: string;
+  apiBaseUrl: string;
+  browser: BrowserType;
+  headless: boolean;
+  device?: string;
+  parallelWorkers: number;
+  retryCount: number;
+  defaultTimeout: number;
+  slowMo: number;
+  users: {
+    standard: UserCredentials;
+    lockedOut: UserCredentials;
+    admin: UserCredentials;
+  };
+  authToken: string;
+}
+
+const toBoolean = (val: string | undefined, fallback: boolean): boolean => {
+  if (val === undefined) return fallback;
+  return val.toLowerCase() === 'true';
+};
+
+const toNumber = (val: string | undefined, fallback: number): number => {
+  if (val === undefined) return fallback;
+  const parsed = parseInt(val, 10);
+  return isNaN(parsed) ? fallback : parsed;
+};
+
+export const config: AppConfig = {
+  env: activeEnv,
+  baseUrl: process.env.BASE_URL || 'https://www.saucedemo.com',
+  apiBaseUrl: process.env.API_BASE_URL || '',
+  browser: (process.env.BROWSER as BrowserType) || 'chromium',
+  headless: toBoolean(process.env.HEADLESS, true),
+  device: process.env.DEVICE,
+  parallelWorkers: toNumber(process.env.PARALLEL, 4),
+  retryCount: toNumber(process.env.RETRY, 0),
+  defaultTimeout: toNumber(process.env.TIMEOUT, 60000),
+  slowMo: toNumber(process.env.SLOW_MO, 0),
+  users: {
+    standard: {
+      username: process.env.STANDARD_USERNAME || 'standard_user',
+      password: process.env.STANDARD_PASSWORD || 'secret_sauce',
+    },
+    lockedOut: {
+      username: process.env.LOCKED_OUT_USERNAME || 'locked_out_user',
+      password: process.env.LOCKED_OUT_PASSWORD || 'secret_sauce',
+    },
+    admin: {
+      username: process.env.ADMIN_USERNAME || 'admin',
+      password: process.env.ADMIN_PASSWORD || '',
+    },
+  },
+  authToken: process.env.AUTH_BEARER_TOKEN || '',
+};`
+      },
+
+      "browser-factory.ts": {
+        path: "src/support/browser-factory.ts",
+        badge: "Browser Matrix Engine",
+        code: `import { chromium, firefox, webkit, Browser, devices, BrowserContextOptions } from '@playwright/test';
+import { config, BrowserType } from './config';
+
+export class BrowserFactory {
+  static async getBrowser(browserName: BrowserType = config.browser): Promise<Browser> {
+    const launchOptions = {
+      headless: config.headless,
+      slowMo: config.slowMo,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    };
+
+    switch (browserName.toLowerCase()) {
+      case 'firefox':
+        return await firefox.launch(launchOptions);
+      case 'webkit':
+        return await webkit.launch(launchOptions);
+      case 'chromium':
+      default:
+        return await chromium.launch(launchOptions);
+    }
+  }
+
+  static getContextOptions(deviceName?: string): BrowserContextOptions {
+    const targetDevice = deviceName || config.device;
+
+    if (targetDevice && devices[targetDevice]) {
+      return {
+        ...devices[targetDevice],
+        recordVideo: { dir: 'reports/videos/' },
+      };
+    }
+
+    return {
+      viewport: { width: 1920, height: 1080 },
+      recordVideo: { dir: 'reports/videos/' },
+    };
+  }
+}`
+      },
+
+      "custom-world.ts": {
+        path: "src/support/custom-world.ts",
+        badge: "Parallel World Constructor",
+        code: `import { setWorldConstructor, World, IWorldOptions } from '@cucumber/cucumber';
+import { Browser, BrowserContext, Page } from '@playwright/test';
+
+export interface CustomWorld extends World {
+  browser?: Browser;
+  context?: BrowserContext;
+  page?: Page;
+}
+
+export class CustomWorldImpl extends World implements CustomWorld {
+  browser?: Browser;
+  context?: BrowserContext;
+  page?: Page;
+
+  constructor(options: IWorldOptions) {
+    super(options);
+  }
+}
+
+// Thread-safe instance registered per worker scenario
+setWorldConstructor(CustomWorldImpl);`
+      },
+
+      "hooks.ts": {
+        path: "src/support/hooks.ts",
+        badge: "Lifecycle & Screenshots",
+        code: `import { Before, After, BeforeAll, AfterAll, Status, setDefaultTimeout } from '@cucumber/cucumber';
+import { Browser } from '@playwright/test';
+import * as fs from 'fs';
+import { CustomWorld } from './custom-world';
+import { BrowserFactory } from './browser-factory';
+import { config } from './config';
+import { AUTH_FILE_PATH, ensureAuthenticatedState } from './auth-setup';
+
+setDefaultTimeout(config.defaultTimeout);
+
+let browser: Browser;
+
+BeforeAll(async function () {
+  // Pre-generate auth state once before parallel workers start
+  await ensureAuthenticatedState();
+  browser = await BrowserFactory.getBrowser();
+});
+
+AfterAll(async function () {
+  if (browser) {
+    await browser.close();
+  }
+});
+
+Before(async function (this: CustomWorld, scenario) {
+  this.browser = browser;
+  const baseOptions = BrowserFactory.getContextOptions();
+  
+  const isUnauthenticatedScenario = scenario.pickle.tags.some(
+    (tag) => tag.name === '@unauthenticated' || tag.name === '@login'
+  );
+
+  // If scenario is tagged @authenticated, inject storageState
+  if (!isUnauthenticatedScenario && fs.existsSync(AUTH_FILE_PATH)) {
+    this.context = await browser.newContext({
+      ...baseOptions,
+      storageState: AUTH_FILE_PATH,
+    });
+  } else {
+    this.context = await browser.newContext(baseOptions);
+  }
+
+  this.page = await this.context.newPage();
+});
+
+After(async function (this: CustomWorld, scenario) {
+  // Auto-capture screenshot on failure
+  if (scenario.result?.status === Status.FAILED && this.page) {
+    const sanitized = scenario.pickle.name.replace(/[^a-zA-Z0-9]/g, '_');
+    const screenshot = await this.page.screenshot({
+      path: \`reports/screenshots/\${sanitized}.png\`,
+      fullPage: true,
+    });
+    this.attach(screenshot, 'image/png');
+  }
+
+  // Isolated teardown
+  await this.page?.close();
+  await this.context?.close();
+});`
+      },
+
+      "auth-setup.ts": {
+        path: "src/support/auth-setup.ts",
+        badge: "storageState Session Cache",
+        code: `import { chromium } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+import { config } from './config';
+import { LoginPage } from '../pages/LoginPage';
+
+export const AUTH_FILE_PATH = path.resolve(process.cwd(), 'reports/auth/user-auth.json');
+
+export async function ensureAuthenticatedState(): Promise<void> {
+  const dir = path.dirname(AUTH_FILE_PATH);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  // Reuse existing valid state
+  if (fs.existsSync(AUTH_FILE_PATH)) {
+    return;
+  }
+
+  const browser = await chromium.launch({ headless: true });
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
+  const loginPage = new LoginPage(page);
+  await loginPage.navigate();
+  await loginPage.login(config.users.standard.username, config.users.standard.password);
+  await loginPage.verifyDashboardDisplayed();
+
+  // Save session cookies and storage
+  await context.storageState({ path: AUTH_FILE_PATH });
+
+  await context.close();
+  await browser.close();
+}`
+      },
+
+      "parameter-types.ts": {
+        path: "src/support/parameter-types.ts",
+        badge: "Custom ParameterTypes",
+        code: `import { defineParameterType } from '@cucumber/cucumber';
+import { UserCredential } from '../models/user.model';
+
+// 1. Transform user role token: {userRole}
+defineParameterType({
+  name: 'userRole',
+  regexp: /standard|locked_out|problem|performance_glitch/,
+  transformer: (role: string): UserCredential => {
+    const validRole = role as 'standard' | 'locked_out' | 'problem' | 'performance_glitch';
+    return new UserCredential(\`\${validRole}_user\`, validRole);
+  },
+});
+
+// 2. Transform time expressions: {duration} (e.g., '2 seconds' -> 2000ms)
+defineParameterType({
+  name: 'duration',
+  regexp: /(\\d+)\\s*(seconds?|s|ms|milliseconds?)/,
+  transformer: (amount: string, unit: string): number => {
+    const numericAmount = parseInt(amount, 10);
+    if (unit.startsWith('second') || unit === 's') {
+      return numericAmount * 1000;
+    }
+    return numericAmount;
+  },
+});
+
+// 3. Transform state keywords: {booleanState}
+defineParameterType({
+  name: 'booleanState',
+  regexp: /enabled|disabled|visible|hidden|true|false/,
+  transformer: (state: string): boolean => {
+    return ['enabled', 'visible', 'true'].includes(state.toLowerCase());
+  },
+});`
+      },
+
+      "data-table-types.ts": {
+        path: "src/support/data-table-types.ts",
+        badge: "Custom DataTable Transformers",
+        code: `import { defineDataTableType } from '@cucumber/cucumber';
+import { ProductItem, ShippingInfo } from '../models/checkout.model';
+
+// 1. Row-level transformer: converts each row into a typed ProductItem
+defineDataTableType((entry: Record<string, string>): ProductItem => {
+  return {
+    productName: entry['productName'],
+    quantity: entry['quantity'] ? parseInt(entry['quantity'], 10) : 1,
+  };
+});
+
+// 2. Key-value transformer: converts 2-column table into a ShippingInfo object
+defineDataTableType((entry: Record<string, string>): ShippingInfo => {
+  return {
+    firstName: entry['firstName'] ?? '',
+    lastName: entry['lastName'] ?? '',
+    postalCode: entry['postalCode'] ?? '',
+  };
+});`
+      },
+
+      "checkout.model.ts": {
+        path: "src/models/checkout.model.ts",
+        badge: "TypeScript Model",
+        code: `export interface ProductItem {
+  productName: string;
+  quantity?: number;
+}
+
+export interface ShippingInfo {
+  firstName: string;
+  lastName: string;
+  postalCode: string;
+}`
+      },
+
+      "user.model.ts": {
+        path: "src/models/user.model.ts",
+        badge: "TypeScript Model",
+        code: `export type UserRoleType = 'standard' | 'locked_out' | 'problem' | 'performance_glitch';
+
+export class UserCredential {
+  constructor(
+    public readonly username: string,
+    public readonly role: UserRoleType
+  ) {}
+
+  get password(): string {
+    return 'secret_sauce';
+  }
+}`
+      },
+
+      "BasePage.ts": {
+        path: "src/pages/BasePage.ts",
+        badge: "Centralized Playwright Wrapper",
+        code: `import { Page, Locator, expect } from '@playwright/test';
+
+export abstract class BasePage {
+  readonly page: Page;
+
+  constructor(page: Page) {
+    this.page = page;
+  }
+
+  // --- Navigation & Core Window ---
+  async goto(url: string): Promise<void> {
+    await this.page.goto(url, { waitUntil: 'domcontentloaded' });
+  }
+
+  async getPageTitle(): Promise<string> {
+    return await this.page.title();
+  }
+
+  async getPageUrl(): Promise<string> {
+    return this.page.url();
+  }
+
+  // --- Centralized Locator Resolver ---
+  protected getLocator(selector: string | Locator): Locator {
+    return typeof selector === 'string' ? this.page.locator(selector) : selector;
+  }
+
+  // --- Actions with Auto-Wait ---
+  async click(selector: string | Locator): Promise<void> {
+    const element = this.getLocator(selector);
+    await element.waitFor({ state: 'visible' });
+    await element.click();
+  }
+
+  async type(selector: string | Locator, text: string, delay = 0): Promise<void> {
+    const element = this.getLocator(selector);
+    await element.waitFor({ state: 'visible' });
+    await element.fill('');
+    if (delay > 0) {
+      await element.pressSequentially(text, { delay });
+    } else {
+      await element.fill(text);
+    }
+  }
+
+  async getText(selector: string | Locator): Promise<string> {
+    const element = this.getLocator(selector);
+    await element.waitFor({ state: 'visible' });
+    return (await element.textContent())?.trim() ?? '';
+  }
+
+  async selectDropdownByValue(selector: string | Locator, value: string): Promise<string[]> {
+    const element = this.getLocator(selector);
+    await element.waitFor({ state: 'visible' });
+    return await element.selectOption({ value });
+  }
+
+  async hover(selector: string | Locator): Promise<void> {
+    const element = this.getLocator(selector);
+    await element.waitFor({ state: 'visible' });
+    await element.hover();
+  }
+
+  // --- Assertions ---
+  async expectToBeVisible(selector: string | Locator, timeout = 5000): Promise<void> {
+    const element = this.getLocator(selector);
+    await expect(element).toBeVisible({ timeout });
+  }
+
+  async expectToContainText(selector: string | Locator, expectedSubstring: string, timeout = 5000): Promise<void> {
+    const element = this.getLocator(selector);
+    await expect(element).toContainText(expectedSubstring, { timeout });
+  }
+
+  async expectToHaveText(selector: string | Locator, expectedText: string, timeout = 5000): Promise<void> {
+    const element = this.getLocator(selector);
+    await expect(element).toHaveText(expectedText, { timeout });
+  }
+
+  async waitForPageNetworkIdle(): Promise<void> {
+    await this.page.waitForLoadState('networkidle');
+  }
+}`
+      },
+
+      "LoginPage.ts": {
+        path: "src/pages/LoginPage.ts",
+        badge: "Page Object Model",
+        code: `import { Page } from '@playwright/test';
+import { BasePage } from './BasePage';
+import { config } from '../support/config';
+
+export class LoginPage extends BasePage {
+  private readonly usernameInput = '#user-name';
+  private readonly passwordInput = '#password';
+  private readonly loginButton = '#login-button';
+  private readonly dashboardHeader = '.title';
+  private readonly errorMessage = '[data-test="error"]';
+
+  constructor(page: Page) {
+    super(page);
+  }
+
+  async navigate(): Promise<void> {
+    await this.goto(config.baseUrl);
+  }
+
+  async login(user: string, pass: string): Promise<void> {
+    await this.type(this.usernameInput, user);
+    await this.type(this.passwordInput, pass);
+    await this.click(this.loginButton);
+  }
+
+  async verifyDashboardDisplayed(): Promise<void> {
+    await this.expectToBeVisible(this.dashboardHeader);
+  }
+
+  async verifyErrorMessage(expectedText: string): Promise<void> {
+    await this.expectToContainText(this.errorMessage, expectedText);
+  }
+
+  async verifyUsernameFieldVisible(): Promise<void> {
+    await this.expectToBeVisible(this.usernameInput);
+  }
+
+  async verifyPasswordFieldVisible(): Promise<void> {
+    await this.expectToBeVisible(this.passwordInput);
+  }
+
+  async verifyLoginButtonVisible(): Promise<void> {
+    await this.expectToBeVisible(this.loginButton);
+  }
+}`
+      },
+
+      "InventoryPage.ts": {
+        path: "src/pages/InventoryPage.ts",
+        badge: "Page Object Model",
+        code: `import { Page } from '@playwright/test';
+import { BasePage } from './BasePage';
+
+export class InventoryPage extends BasePage {
+  private readonly cartIcon = '.shopping_cart_link';
+  private readonly checkoutButton = '#checkout';
+  private readonly inventoryList = '.inventory_list';
+
+  constructor(page: Page) {
+    super(page);
+  }
+
+  async addProductToCart(productName: string): Promise<void> {
+    const addToCartButton = this.page
+      .locator('.inventory_item')
+      .filter({ hasText: productName })
+      .locator('button');
+    await this.click(addToCartButton);
+  }
+
+  async openCart(): Promise<void> {
+    await this.click(this.cartIcon);
+  }
+
+  async proceedToCheckout(): Promise<void> {
+    await this.click(this.checkoutButton);
+  }
+
+  async verifyInventoryListLoaded(): Promise<void> {
+    await this.expectToBeVisible(this.inventoryList);
+  }
+}`
+      },
+
+      "CheckoutPage.ts": {
+        path: "src/pages/CheckoutPage.ts",
+        badge: "Page Object Model",
+        code: `import { Page } from '@playwright/test';
+import { BasePage } from './BasePage';
+import { ShippingInfo } from '../models/checkout.model';
+
+export class CheckoutPage extends BasePage {
+  private readonly firstNameInput = '#first-name';
+  private readonly lastNameInput = '#last-name';
+  private readonly postalCodeInput = '#postal-code';
+  private readonly continueButton = '#continue';
+  private readonly finishButton = '#finish';
+  private readonly confirmationHeader = '.complete-header';
+
+  constructor(page: Page) {
+    super(page);
+  }
+
+  async fillShippingDetails(info: ShippingInfo): Promise<void> {
+    await this.type(this.firstNameInput, info.firstName);
+    await this.type(this.lastNameInput, info.lastName);
+    await this.type(this.postalCodeInput, info.postalCode);
+  }
+
+  async continueCheckout(): Promise<void> {
+    await this.click(this.continueButton);
+  }
+
+  async finishOrder(): Promise<void> {
+    await this.click(this.finishButton);
+  }
+
+  async verifyItemPresentInOverview(productName: string, quantity: string): Promise<void> {
+    const itemRow = this.page.locator('.cart_item').filter({ hasText: productName });
+    await this.expectToBeVisible(itemRow);
+    await this.expectToHaveText(itemRow.locator('.cart_quantity'), quantity);
+  }
+
+  async verifyConfirmationHeader(expectedMessage: string): Promise<void> {
+    await this.expectToHaveText(this.confirmationHeader, expectedMessage);
+  }
+}`
+      },
+
+      "login.feature": {
+        path: "features/login.feature",
+        badge: "Gherkin BDD",
+        code: `@auth @regression
+Feature: User Authentication & Login Scenarios
+
+  As an existing user of SauceDemo
+  I want to be able to log in with valid credentials
+  And see appropriate error messages when entering invalid credentials
+  So that I can securely access the platform
+
+  Background:
+    Given the user navigates to the login page
+
+  @smoke @positive
+  Scenario: Standard user login validation
+    When the user enters credentials "standard_user" and "secret_sauce"
+    Then the dashboard title should be displayed
+
+  @negative
+  Scenario Outline: Failed login with invalid or missing credentials
+    When the user enters credentials "<username>" and "<password>"
+    Then the login error message should contain "<expected_error>"
+
+    Examples:
+      | username        | password         | expected_error                                      |
+      | locked_out_user | secret_sauce     | Epic sadface: Sorry, this user has been locked out. |
+      | standard_user   | wrong_password   | Epic sadface: Username and password do not match    |
+      | invalid_user    | invalid_password | Epic sadface: Username and password do not match    |
+      |                 | secret_sauce     | Epic sadface: Username is required                  |
+      | standard_user   |                  | Epic sadface: Password is required                  |
+
+  @ui @visual
+  Scenario: Verify all initial login form elements are visible
+    Then the username field should be visible
+    And the password field should be visible
+    And the login button should be visible`
+      },
+
+      "checkout.feature": {
+        path: "features/checkout.feature",
+        badge: "Gherkin DataTables",
+        code: `@checkout @e2e
+Feature: E-Commerce Product Purchase and Checkout Flow
+
+  As a standard registered user
+  I want to select items, enter my shipping details, and place an order
+  So that I can successfully purchase products online
+
+  Background:
+    Given the user navigates to the login page
+    And the user logs in with standard credentials
+
+  @smoke
+  Scenario: Complete end-to-end checkout with multiple items
+    When the user adds the following products to the cart:
+      | productName             |
+      | Sauce Labs Backpack     |
+      | Sauce Labs Bike Light   |
+      | Sauce Labs Bolt T-Shirt |
+    And the user opens the shopping cart
+    And the user proceeds to checkout
+    And the user fills in shipping information:
+      | firstName  | John       |
+      | lastName   | Doe        |
+      | postalCode | 12345      |
+    And the user continues to the order summary
+    Then the order overview should list the selected items:
+      | productName             | quantity |
+      | Sauce Labs Backpack     | 1        |
+      | Sauce Labs Bike Light   | 1        |
+      | Sauce Labs Bolt T-Shirt | 1        |
+    When the user finishes the purchase
+    Then the order confirmation message "Thank you for your order!" should be displayed`
+      },
+
+      "login.steps.ts": {
+        path: "src/steps/login.steps.ts",
+        badge: "Cucumber Step Definitions",
+        code: `import { Given, When, Then } from '@cucumber/cucumber';
+import { CustomWorld } from '../support/custom-world';
+import { LoginPage } from '../pages/LoginPage';
+
+Given('the user navigates to the login page', async function (this: CustomWorld) {
+  const loginPage = new LoginPage(this.page!);
+  await loginPage.navigate();
+});
+
+When('the user enters credentials {string} and {string}', async function (this: CustomWorld, user: string, pass: string) {
+  const loginPage = new LoginPage(this.page!);
+  await loginPage.login(user, pass);
+});
+
+Then('the dashboard title should be displayed', async function (this: CustomWorld) {
+  const loginPage = new LoginPage(this.page!);
+  await loginPage.verifyDashboardDisplayed();
+});
+
+Then('the login error message should contain {string}', async function (this: CustomWorld, expectedError: string) {
+  const loginPage = new LoginPage(this.page!);
+  await loginPage.verifyErrorMessage(expectedError);
+});
+
+Then('the username field should be visible', async function (this: CustomWorld) {
+  const loginPage = new LoginPage(this.page!);
+  await loginPage.verifyUsernameFieldVisible();
+});
+
+Then('the password field should be visible', async function (this: CustomWorld) {
+  const loginPage = new LoginPage(this.page!);
+  await loginPage.verifyPasswordFieldVisible();
+});
+
+Then('the login button should be visible', async function (this: CustomWorld) {
+  const loginPage = new LoginPage(this.page!);
+  await loginPage.verifyLoginButtonVisible();
+});`
+      },
+
+      "checkout.steps.ts": {
+        path: "src/steps/checkout.steps.ts",
+        badge: "Cucumber Step Definitions",
+        code: `import { Given, When, Then } from '@cucumber/cucumber';
+import { CustomWorld } from '../support/custom-world';
+import { LoginPage } from '../pages/LoginPage';
+import { InventoryPage } from '../pages/InventoryPage';
+import { CheckoutPage } from '../pages/CheckoutPage';
+import { ProductItem, ShippingInfo } from '../models/checkout.model';
+
+Given('the user logs in with standard credentials', async function (this: CustomWorld) {
+  const loginPage = new LoginPage(this.page!);
+  await loginPage.login('standard_user', 'secret_sauce');
+  await loginPage.verifyDashboardDisplayed();
+});
+
+When('the user adds the following products to the cart:', async function (this: CustomWorld, products: ProductItem[]) {
+  const inventoryPage = new InventoryPage(this.page!);
+  for (const item of products) {
+    await inventoryPage.addProductToCart(item.productName);
+  }
+});
+
+When('the user opens the shopping cart', async function (this: CustomWorld) {
+  const inventoryPage = new InventoryPage(this.page!);
+  await inventoryPage.openCart();
+});
+
+When('the user proceeds to checkout', async function (this: CustomWorld) {
+  const inventoryPage = new InventoryPage(this.page!);
+  await inventoryPage.proceedToCheckout();
+});
+
+When('the user fills in shipping information:', async function (this: CustomWorld, shippingDetails: ShippingInfo) {
+  const checkoutPage = new CheckoutPage(this.page!);
+  await checkoutPage.fillShippingDetails(shippingDetails);
+});
+
+When('the user continues to the order summary', async function (this: CustomWorld) {
+  const checkoutPage = new CheckoutPage(this.page!);
+  await checkoutPage.continueCheckout();
+});
+
+Then('the order overview should list the selected items:', async function (this: CustomWorld, expectedItems: ProductItem[]) {
+  const checkoutPage = new CheckoutPage(this.page!);
+  for (const item of expectedItems) {
+    await checkoutPage.verifyItemPresentInOverview(item.productName, String(item.quantity ?? 1));
+  }
+});
+
+When('the user finishes the purchase', async function (this: CustomWorld) {
+  const checkoutPage = new CheckoutPage(this.page!);
+  await checkoutPage.finishOrder();
+});
+
+Then('the order confirmation message {string} should be displayed', async function (this: CustomWorld, message: string) {
+  const checkoutPage = new CheckoutPage(this.page!);
+  await checkoutPage.verifyConfirmationHeader(message);
+});`
+      },
+
+      "auth.steps.ts": {
+        path: "src/steps/auth.steps.ts",
+        badge: "Custom Parameter Steps",
+        code: `import { Given, When, Then } from '@cucumber/cucumber';
+import { CustomWorld } from '../support/custom-world';
+import { LoginPage } from '../pages/LoginPage';
+import { UserCredential } from '../models/user.model';
+
+Given('the {userRole} logs into the platform', async function (this: CustomWorld, user: UserCredential) {
+  const loginPage = new LoginPage(this.page!);
+  await loginPage.navigate();
+  await loginPage.login(user.username, user.password);
+});
+
+When('the user pauses for {duration}', async function (this: CustomWorld, ms: number) {
+  await this.page!.waitForTimeout(ms);
+});
+
+Then('the login button should be {booleanState}', async function (this: CustomWorld, expectedState: boolean) {
+  const loginPage = new LoginPage(this.page!);
+  if (expectedState) {
+    await loginPage.verifyLoginButtonVisible();
+  }
+});`
+      }
+    };
+
+    let currentOpenKey = "login.feature";
+
+    function openFile(key) {
+      currentOpenKey = key;
+      const file = CODE_REPOSITORY[key];
+      if (!file) return;
+
+      document.querySelectorAll('.file-tree-btn').forEach(btn => {
+        if (btn.getAttribute('data-id') === key) {
+          btn.className = "file-tree-btn w-full text-left py-1 px-2 rounded bg-slate-800 text-emerald-400 font-semibold flex items-center justify-between";
+        } else {
+          btn.className = "file-tree-btn w-full text-left py-1 px-2 rounded hover:bg-slate-800 text-slate-400 flex items-center justify-between";
+        }
+      });
+
+      document.getElementById('codeFilePath').innerHTML = `<i class="fa-regular fa-file-code text-emerald-400"></i> ${file.path}`;
+      document.getElementById('codeFileBadge').innerText = file.badge;
+      document.getElementById('codeTextOutput').innerText = file.code;
+    }
+
+    function copyCurrentFileCode() {
+      const code = CODE_REPOSITORY[currentOpenKey]?.code || "";
+      document.execCommand('copy');
+      navigator.clipboard.writeText(code).then(() => {
+        showToast(`Copied ${CODE_REPOSITORY[currentOpenKey].path} to clipboard!`);
+      });
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.innerText = message;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 2500);
+    }
+
+    /* =========================================================================
+       2. ARCHITECTURE INTERACTIVE DATA
+       ========================================================================= */
+    const ARCH_STEPS = [
+      {
+        layer: "1. Feature Files (.feature)",
+        tech: "Cucumber Gherkin Specifications",
+        purpose: "Defines human-readable scenarios using Given/When/Then statements. Supports Scenario Outlines for data-driven testing, Data Tables for lists and forms, and tags (@smoke, @regression, @authenticated) for parallel filtering.",
+        code: `@checkout @smoke
+Scenario: Complete purchase flow
+  Given the user navigates to the login page
+  And the user logs in with standard credentials
+  When the user adds the following products to the cart:
+    | productName         |
+    | Sauce Labs Backpack |`
+      },
+      {
+        layer: "2. Step Bindings & Transformers",
+        tech: "TypeScript Step Definitions & Custom Types",
+        purpose: "Binds Gherkin patterns to TypeScript functions. Uses registered custom ParameterTypes ({userRole}, {duration}) and DataTable transformers to convert Gherkin text directly into domain classes before step invocation.",
+        code: `When('the user adds the following products to the cart:', 
+  async function (this: CustomWorld, products: ProductItem[]) {
+    const inventory = new InventoryPage(this.page!);
+    for (const item of products) {
+      await inventory.addProductToCart(item.productName);
+    }
+});`
+      },
+      {
+        layer: "3. Custom World & Lifecycle Hooks",
+        tech: "src/support/custom-world.ts & hooks.ts",
+        purpose: "Provides strict thread isolation across parallel workers. Injects isolated BrowserContext and Page instances into 'this', attaches screenshots on failure, and manages storageState conditional injection.",
+        code: `Before(async function (this: CustomWorld, scenario) {
+  this.browser = browser;
+  this.context = await browser.newContext(contextOptions);
+  this.page = await this.context.newPage();
+});
+
+After(async function (this: CustomWorld, scenario) {
+  if (scenario.result?.status === Status.FAILED && this.page) {
+    const shot = await this.page.screenshot({ fullPage: true });
+    this.attach(shot, 'image/png');
+  }
+  await this.page?.close();
+  await this.context?.close();
+});`
+      },
+      {
+        layer: "4. Browser Factory & Device Matrix",
+        tech: "src/support/browser-factory.ts",
+        purpose: "Launches Chromium, Firefox, or WebKit with optimized flags. Retrieves Playwright pre-configured device viewports (iPhone 15 Pro, Pixel 7) with video recording and touch support.",
+        code: `export class BrowserFactory {
+  static async getBrowser(type: BrowserType = config.browser): Promise<Browser> {
+    const options = { headless: config.headless, slowMo: config.slowMo };
+    switch (type) {
+      case 'firefox': return await firefox.launch(options);
+      case 'webkit':  return await webkit.launch(options);
+      default:        return await chromium.launch(options);
+    }
+  }
+}`
+      },
+      {
+        layer: "5. BasePage Centralized Wrapper",
+        tech: "src/pages/BasePage.ts",
+        purpose: "Wraps Playwright's Page and Locator primitives. Centralizes explicit waiting (waitFor state 'visible'), input clearing, click interactions, text retrieval, and expect assertions.",
+        code: `export abstract class BasePage {
+  readonly page: Page;
+  constructor(page: Page) { this.page = page; }
+
+  async click(selector: string | Locator): Promise<void> {
+    const el = typeof selector === 'string' ? this.page.locator(selector) : selector;
+    await el.waitFor({ state: 'visible' });
+    await el.click();
+  }
+}`
+      },
+      {
+        layer: "6. Page Object Model (POM)",
+        tech: "LoginPage.ts, InventoryPage.ts, CheckoutPage.ts",
+        purpose: "Inherits from BasePage. Encapsulates CSS/XPath selectors and multi-step business interactions, separating test intent from underlying UI mechanics.",
+        code: `export class LoginPage extends BasePage {
+  private readonly usernameInput = '#user-name';
+  private readonly passwordInput = '#password';
+  private readonly loginButton = '#login-button';
+
+  async login(user: string, pass: string): Promise<void> {
+    await this.type(this.usernameInput, user);
+    await this.type(this.passwordInput, pass);
+    await this.click(this.loginButton);
+  }
+}`
+      },
+      {
+        layer: "7. Extent-Grade HTML Reporter",
+        tech: "generate-report.cjs (multiple-cucumber-html-reporter)",
+        purpose: "Processes Cucumber's JSON execution stream into an interactive HTML dashboard with pass/fail graphs, execution metadata (OS, browser, device), step timings, and failure screenshots.",
+        code: `const report = require('multiple-cucumber-html-reporter');
+report.generate({
+  jsonDir: './reports',
+  reportPath: './reports/html-report',
+  metadata: {
+    browser: { name: 'CHROMIUM', version: 'Latest' },
+    device: 'Desktop (1920x1080)',
+    platform: { name: os.platform(), version: os.release() }
+  }
+});`
+      }
+    ];
+
+    function inspectArch(index) {
+      const data = ARCH_STEPS[index];
+      document.querySelectorAll('.arch-card').forEach((card, i) => {
+        if (i === index) {
+          card.className = "arch-card text-left p-3.5 rounded-xl border border-emerald-500/50 bg-emerald-950/40 text-emerald-300 transition-all shadow-md shadow-emerald-900/20";
+        } else {
+          card.className = "arch-card text-left p-3.5 rounded-xl border border-slate-800 bg-slate-900/80 hover:border-slate-700 transition-all";
+        }
+      });
+
+      const container = document.getElementById('archDetailShowcase');
+      container.innerHTML = `
+        <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+          <div class="lg:w-1/2 space-y-3">
+            <span class="text-xs px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-mono">${data.tech}</span>
+            <h3 class="text-xl font-bold text-white">${data.layer}</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">${data.purpose}</p>
+          </div>
+          <div class="lg:w-1/2">
+            <div class="bg-slate-950 rounded-xl border border-slate-800 p-4 font-mono text-xs overflow-x-auto text-emerald-300 code-glow">
+              <pre><code>${escapeHtml(data.code)}</code></pre>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    /* =========================================================================
+       3. TROUBLESHOOTING MATRIX DATA (8 Documented Errors)
+       ========================================================================= */
+    const TROUBLESHOOTING_DATA = [
+      {
+        id: "err-mkdir",
+        category: "os",
+        title: "Error 1: 'mkdir -p' fails in Windows PowerShell/CMD",
+        errorSnippet: `'mkdir' is not recognized as an internal or external command, or syntax error with -p flag`,
+        rootCause: "PowerShell interprets 'mkdir' as an alias for New-Item, which does not accept the POSIX Linux '-p' flag.",
+        solution: "Use native PowerShell cmdlet: New-Item -ItemType Directory -Force -Path features, src/pages, reports or execute commands in Git Bash."
+      },
+      {
+        id: "err-tsnode",
+        category: "ts",
+        title: "Error 2: TypeError: Cannot read properties of undefined (reading 'fileExists')",
+        errorSnippet: `TypeError: Cannot read properties of undefined (reading 'fileExists') at ts-node/src/index.ts`,
+        rootCause: "ts-node internal compiler host has major compatibility breakages with Node v20 - v24 ESM loader threads.",
+        solution: "Replaced ts-node with 'tsx'. 'tsx' uses esbuild under the hood and executes TypeScript in ESM seamlessly without compiler host crashes."
+      },
+      {
+        id: "err-esm-import",
+        category: "esm",
+        title: "Error 3: SyntaxError: Cannot use import statement outside a module",
+        errorSnippet: `SyntaxError: Cannot use import statement outside a module in cucumber step definition`,
+        rootCause: "Node defaults to CommonJS unless specified. Cucumber was loading .ts files with standard 'require' rather than ESM import.",
+        solution: "Added \"type\": \"module\" in package.json and switched cucumber.json configuration from \"require\" to \"import\": [\"src/steps/**/*.ts\", \"src/support/**/*.ts\"]."
+      },
+      {
+        id: "err-node10",
+        category: "ts",
+        title: "Error 4: Option 'moduleResolution=node10' is deprecated",
+        errorSnippet: `Option 'moduleResolution=node10' is deprecated and will stop functioning in TypeScript 6.0`,
+        rootCause: "Legacy TypeScript compiler option defaults to old Node 10 resolution algorithm incompatible with modern ESM packages.",
+        solution: "Updated tsconfig.json to \"moduleResolution\": \"bundler\" and \"module\": \"ESNext\"."
+      },
+      {
+        id: "err-package-path",
+        category: "esm",
+        title: "Error 5: [ERR_PACKAGE_PATH_NOT_EXPORTED] in multiple-cucumber-html-reporter",
+        errorSnippet: `Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No 'exports' main defined in multiple-cucumber-html-reporter/package.json`,
+        rootCause: "multiple-cucumber-html-reporter is an older CommonJS library without native ESM exports map. When project has \"type\": \"module\", Node rejects 'import ... from multiple-cucumber-html-reporter'.",
+        solution: "Created 'generate-report.cjs' using explicit CommonJS .cjs extension with 'const report = require(...)', invoked via 'node generate-report.cjs'."
+      },
+      {
+        id: "err-module-not-found",
+        category: "esm",
+        title: "Error 6: [ERR_MODULE_NOT_FOUND]: Cannot find module ... custom-world",
+        errorSnippet: `Cannot find module '.../src/support/custom-world' imported from '.../src/steps/login.steps.ts' code: 'ERR_MODULE_NOT_FOUND'`,
+        rootCause: "Node's native ESM loader strictly forbids extensionless imports (e.g. import from '../support/custom-world').",
+        solution: "Ran cucumber through tsx loader: 'tsx node_modules/@cucumber/cucumber/bin/cucumber.js' which intercepts ESM resolution and transparently resolves extensionless TypeScript paths."
+      },
+      {
+        id: "err-process",
+        category: "ts",
+        title: "Error 7: Cannot find name 'process'",
+        errorSnippet: `Cannot find name 'process'. Do you need to install type definitions for node?`,
+        rootCause: "TypeScript did not have Node runtime globals registered in the compilation scope.",
+        solution: "Ran 'npm i -D @types/node' and added \"types\": [\"node\"] under compilerOptions in tsconfig.json."
+      },
+      {
+        id: "err-rootdir",
+        category: "ts",
+        title: "Error 8: The common source directory is './src'. The 'rootDir' setting must be explicitly set",
+        errorSnippet: `The common source directory of 'tsconfig.json' is './src'. The 'rootDir' setting must be explicitly set to adjust output's file layout`,
+        rootCause: "Files located both in ./src and root scripts (e.g. features or generate-report) caused TypeScript to dispute the base output tree.",
+        solution: "Explicitly set \"rootDir\": \"./\" in tsconfig.json so the root directory forms the unified anchor for all compilation modules."
+      }
+    ];
+
+    function renderTroubleshooting(items) {
+      const grid = document.getElementById('troubleshootingGrid');
+      grid.innerHTML = items.map(err => `
+        <div class="p-5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between space-y-3">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold uppercase">${err.category}</span>
+              <span class="text-xs text-slate-500 font-mono"><i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i> Resolved</span>
+            </div>
+            <h4 class="text-sm font-bold text-white">${err.title}</h4>
+            <div class="mt-2 p-2.5 rounded-lg bg-slate-950 border border-red-500/20 font-mono text-[11px] text-red-400 overflow-x-auto">
+              ${escapeHtml(err.errorSnippet)}
+            </div>
+          </div>
+          <div class="space-y-2 pt-1 border-t border-slate-800/80 text-xs text-slate-300">
+            <div><strong class="text-slate-400 font-mono">Root Cause:</strong> ${err.rootCause}</div>
+            <div class="p-2 rounded bg-emerald-950/30 border border-emerald-500/30 text-emerald-300">
+              <strong class="font-mono text-emerald-400">Verified Fix:</strong> ${err.solution}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterTroubleshooting(cat) {
+      document.querySelectorAll('.trouble-tab').forEach(tab => {
+        tab.className = "trouble-tab px-3.5 py-1.5 rounded-lg text-xs font-mono bg-slate-900 text-slate-400 hover:text-white border border-slate-800";
+      });
+      event.target.className = "trouble-tab active px-3.5 py-1.5 rounded-lg text-xs font-mono bg-emerald-600/20 text-emerald-400 border border-emerald-500/30";
+
+      if (cat === 'all') {
+        renderTroubleshooting(TROUBLESHOOTING_DATA);
+      } else {
+        renderTroubleshooting(TROUBLESHOOTING_DATA.filter(i => i.category === cat));
+      }
+    }
+
+    /* =========================================================================
+       4. TERMINAL SIMULATOR
+       ========================================================================= */
+    let terminalBusy = false;
+
+    function resetTerminal() {
+      const term = document.getElementById('terminalStream');
+      term.innerHTML = `
+        <div class="text-slate-500 font-medium">Enterprise Playwright TS BDD Terminal [PowerShell / Bash Wrapper]</div>
+        <div class="text-slate-500">Node v22.12.0 • Playwright v1.49.0 • Cucumber-JS v10.8.0</div>
+        <div class="flex items-center gap-2 pt-2 text-emerald-400">
+          <span>dev@enterprise-bdd:~/playwright-ts-bdd$</span>
+          <span class="inline-block w-2 h-4 bg-emerald-400 pulse-cursor"></span>
+        </div>
+      `;
+    }
+
+    async function triggerTerminal(mode) {
+      if (terminalBusy) return;
+      terminalBusy = true;
+      const term = document.getElementById('terminalStream');
+
+      const payloads = {
+        parallel: {
+          cmd: "npm run test:report",
+          logs: [
+            "> playwright-ts-bdd@1.0.0 test:chrome",
+            "> cross-env BROWSER=chromium tsx node_modules/@cucumber/cucumber/bin/cucumber.js --parallel 4",
+            "[Worker 0] Loaded BrowserContext (Chromium Headless - 1920x1080)",
+            "[Worker 1] Loaded BrowserContext (Chromium Headless - 1920x1080)",
+            "[Worker 2] Loaded BrowserContext (Chromium Headless - 1920x1080)",
+            "[Worker 3] Loaded BrowserContext (Chromium Headless - 1920x1080)",
+            "✔ 1) Scenario: Standard user login validation (1.42s)",
+            "✔ 2) Scenario: Complete end-to-end checkout with multiple items (3.18s)",
+            "✔ 3) Scenario: Access dashboard directly with pre-authenticated state (0.94s)",
+            "✖ 4) Scenario: Failed login with invalid or missing credentials (1.88s)",
+            "   -> Screenshot attached: reports/screenshots/Failed_login_with_invalid.png",
+            "4 scenarios (1 failed, 3 passed)",
+            "18 steps (1 failed, 17 passed)",
+            "> playwright-ts-bdd@1.0.0 report",
+            "> node generate-report.cjs",
+            "╔════════════════════════════════════════════════════════════════╗",
+            "║ Multiple Cucumber HTML Reporter generated successfully!       ║",
+            "║ Dashboard Path: ./reports/html-report/index.html               ║",
+            "╚════════════════════════════════════════════════════════════════╝"
+          ]
+        },
+        headed: {
+          cmd: "npm run test:chrome:headed",
+          logs: [
+            "> cross-env BROWSER=chromium HEADLESS=false tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
+            "[Headless: false] Launching visible Chromium UI window...",
+            "Navigating to: https://www.saucedemo.com/",
+            "Typing credentials 'standard_user'...",
+            "Clicking '#login-button'...",
+            "Assertion Passed: Expected element '.title' to be visible",
+            "✔ Scenario: Standard user login validation (2.14s)",
+            "1 scenario (1 passed)"
+          ]
+        },
+        mobile: {
+          cmd: "npm run test:mobile:ios",
+          logs: [
+            "> cross-env BROWSER=webkit DEVICE=\"iPhone 15 Pro\" tsx node_modules/@cucumber/cucumber/bin/cucumber.js --parallel 4",
+            "[Device Profile] WebKit engine -> iPhone 15 Pro (Viewport: 393x852, DPR: 3, hasTouch: true)",
+            "✔ Scenario: Mobile drawer navigation toggle (1.20s)",
+            "✔ Scenario: Mobile cart badge checkout interaction (2.41s)",
+            "2 scenarios (2 passed) on iOS Safari WebKit"
+          ]
+        },
+        env: {
+          cmd: "npm run test:dev",
+          logs: [
+            "> cross-env ENV=dev tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
+            "[Config] Loaded environment profile: env/.env.dev",
+            "[Config] Target Base URL: https://dev.saucedemo.com",
+            "[Config] Standard Username: standard_dev_user",
+            "✔ Scenario: Authenticate with dev cluster credentials (1.31s)",
+            "1 scenario (1 passed)"
+          ]
+        },
+        retry: {
+          cmd: "npm run test:retry",
+          logs: [
+            "> cross-env BROWSER=chromium tsx node_modules/@cucumber/cucumber/bin/cucumber.js --retry 2",
+            "[Attempt 1] Scenario: Async payment confirmation -> ✖ FAILED (Timeout 5000ms)",
+            "[Retry Mechanism Triggered] Tearing down corrupted context and initializing fresh clean context...",
+            "[Attempt 2] Scenario: Async payment confirmation -> ✔ PASSED (2.12s)",
+            "✔ Scenario passed on retry attempt #2 (Flaky test resolved)"
+          ]
+        }
+      };
+
+      const selected = payloads[mode];
+      term.innerHTML += `
+        <div class="text-white font-bold pt-2 flex items-center gap-2">
+          <span class="text-emerald-400">dev@enterprise-bdd:~/playwright-ts-bdd$</span>
+          <span>${selected.cmd}</span>
+        </div>
+      `;
+
+      for (const line of selected.logs) {
+        await new Promise(r => setTimeout(r, 240));
+        let cls = "text-slate-300";
+        if (line.includes("✔")) cls = "text-emerald-400 font-semibold";
+        if (line.includes("✖")) cls = "text-red-400 font-semibold";
+        if (line.includes("╔") || line.includes("║") || line.includes("╚")) cls = "text-cyan-400 font-bold";
+        if (line.includes("[Device Profile]") || line.includes("[Headless: false]")) cls = "text-purple-400";
+        if (line.includes("[Config]")) cls = "text-teal-400";
+
+        term.innerHTML += `<div class="${cls}">${escapeHtml(line)}</div>`;
+        term.scrollTop = term.scrollHeight;
+      }
+
+      term.innerHTML += `
+        <div class="flex items-center gap-2 pt-2 text-emerald-400">
+          <span>dev@enterprise-bdd:~/playwright-ts-bdd$</span>
+          <span class="inline-block w-2 h-4 bg-emerald-400 pulse-cursor"></span>
+        </div>
+      `;
+      term.scrollTop = term.scrollHeight;
+      terminalBusy = false;
+    }
+
+    /* =========================================================================
+       5. INTERACTIVE SANDBOX (ParameterTypes & DataTables)
+       ========================================================================= */
+    function testParameter(type, sample) {
+      const patternInput = document.getElementById('paramPatternInput');
+      const jsonOutput = document.getElementById('paramJsonOutput');
+
+      if (type === 'user') {
+        patternInput.value = `Given the {userRole} logs into the platform`;
+        jsonOutput.innerHTML = `<pre class="text-amber-400">// Instance of UserCredential Class
+{
+  "username": "${sample}_user",
+  "role": "${sample}",
+  "password": "[PROTECTED - secret_sauce]"
+}</pre>`;
+      } else if (type === 'duration') {
+        patternInput.value = `When the user pauses for {duration}`;
+        jsonOutput.innerHTML = `<pre class="text-cyan-400">// Converted Integer Milliseconds (number)
+{
+  "rawInput": "${sample}",
+  "injectedArgument": 3000
+}</pre>`;
+      } else if (type === 'boolean') {
+        patternInput.value = `Then the login button should be {booleanState}`;
+        jsonOutput.innerHTML = `<pre class="text-emerald-400">// Converted Boolean State (boolean)
+{
+  "rawInput": "${sample}",
+  "injectedArgument": true
+}</pre>`;
+      }
+    }
+
+    function testTableType(type) {
+      const raw = document.getElementById('tableRawInput');
+      const json = document.getElementById('tableJsonOutput');
+
+      if (type === 'products') {
+        raw.innerText = `| productName             | quantity |
+| Sauce Labs Backpack     | 1        |
+| Sauce Labs Bike Light   | 2        |`;
+        json.innerHTML = `<pre class="text-cyan-300">// Injected as ProductItem[]
+[
+  { "productName": "Sauce Labs Backpack", "quantity": 1 },
+  { "productName": "Sauce Labs Bike Light", "quantity": 2 }
+]</pre>`;
+      } else {
+        raw.innerText = `| firstName  | Jane        |
+| lastName   | Smith       |
+| postalCode | 94107       |`;
+        json.innerHTML = `<pre class="text-emerald-300">// Injected as ShippingInfo Object
+{
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "postalCode": "94107"
+}</pre>`;
+      }
+    }
+
+    /* =========================================================================
+       6. REPORT SCENARIO FILTER & SCREENSHOT MODAL
+       ========================================================================= */
+    function filterReportScenarios(status) {
+      document.querySelectorAll('.rep-filter').forEach(btn => {
+        btn.className = "rep-filter px-3 py-1 rounded-lg text-xs font-mono bg-slate-900 text-slate-400 hover:text-white border border-slate-800";
+      });
+      event.target.className = "rep-filter active px-3 py-1 rounded-lg text-xs font-mono bg-slate-800 text-white border border-slate-700";
+
+      document.querySelectorAll('.scenario-item').forEach(item => {
+        if (status === 'all') {
+          item.style.display = 'flex';
+        } else if (status === 'passed') {
+          item.style.display = item.classList.contains('passed') ? 'flex' : 'none';
+        } else if (status === 'failed') {
+          item.style.display = item.classList.contains('failed') ? 'flex' : 'none';
+        }
+      });
+    }
+
+    function openScreenshotModal() {
+      const modal = document.getElementById('screenshotModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeScreenshotModal() {
+      const modal = document.getElementById('screenshotModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    /* =========================================================================
+       7. GLOBAL SEARCH & THEME
+       ========================================================================= */
+    function handleGlobalSearch(e) {
+      const query = e.target.value.toLowerCase().trim();
+      if (!query) return;
+
+      // Check if matches file in tree
+      const matchedKey = Object.keys(CODE_REPOSITORY).find(k => k.toLowerCase().includes(query));
+      if (matchedKey && e.key === 'Enter') {
+        openFile(matchedKey);
+        window.location.hash = "#code-viewer";
+        showToast(`Navigated to ${matchedKey}`);
+      }
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const icon = document.getElementById('themeIcon');
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        icon.className = "fa-solid fa-moon";
+      } else {
+        html.classList.add('dark');
+        icon.className = "fa-solid fa-sun";
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Window Init
+    window.onload = function() {
+      inspectArch(0);
+      openFile('login.feature');
+      renderTroubleshooting(TROUBLESHOOTING_DATA);
+      testParameter('user', 'standard');
+      testTableType('products');
+    };
+  </script>
+</body>
+</html>

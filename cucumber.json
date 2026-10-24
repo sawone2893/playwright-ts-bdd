@@ -1,0 +1,16 @@
+{
+  "default": {
+    "paths": ["features/**/*.feature"],
+    "import": [
+      "src/steps/**/*.ts",
+      "src/support/**/*.ts"
+    ],
+    "format": [
+      "summary",
+      "json:reports/cucumber-report.json"
+    ],
+    "parallel": 4,
+    "retry": 2,
+    "retryTagFilter": "@flaky or not @smoke"
+  }
+}

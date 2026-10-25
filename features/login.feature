@@ -26,7 +26,7 @@ Feature: User Authentication & Login Scenarios
       | invalid_user    | invalid_password | Epic sadface: Username and password do not match            |
       |                 | secret_sauce     | Epic sadface: Username is required                          |
       | standard_user   |                  | Epic sadface: Password is required                          |
-      |                 |                  | Epic sadface: Username is required                          |
+      |                 |                  | Epic sadface: Username is required 11                       |
 
   @ui @visual
   Scenario: Verify all initial login form elements are visible

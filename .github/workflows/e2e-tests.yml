@@ -1,0 +1,55 @@
+name: Playwright BDD E2E Test Suite
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target Environment'
+        required: true
+        default: 'qa'
+        type: choice
+        options:
+          - dev
+          - qa
+          - staging
+          - prod
+      browser:
+        description: 'Browser Engine'
+        required: true
+        default: 'chromium'
+        type: choice
+        options:
+          - chromium
+          - firefox
+          - webkit
+      tags:
+        description: 'Cucumber Tag Expression (e.g. @smoke, @regression, not @flaky)'
+        required: false
+        default: '@smoke or @regression'
+        type: string
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Run E2E Tests (${{ github.event.inputs.browser || 'chromium' }} -${{ github.event.inputs.environment || 'qa' }})
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+
+    env:
+      ENV: ${{ github.event.inputs.environment || 'qa' }}
+      BROWSER: ${{ github.event.inputs.browser || 'chromium' }}
+      HEADLESS: 'true'
+      PARALLEL: '4'
+      RETRY: '2'

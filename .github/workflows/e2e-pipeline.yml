@@ -1,0 +1,113 @@
+name: E2E Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target Environment'
+        required: true
+        default: 'qa'
+        type: choice
+        options:
+          - dev
+          - qa
+          - staging
+      browser:
+        description: 'Target Browser'
+        required: true
+        default: 'chromium'
+        type: choice
+        options:
+          - chromium
+          - firefox
+          - webkit
+
+jobs:
+  test:
+    name: Run Automated E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Project Dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers & OS Dependencies
+        run: npx playwright install --with-deps
+
+      - name: Ensure Reports Directory Exists
+        run: mkdir -p reports
+
+      # 1. Run Cucumber tests and produce JSON output
+      - name: Execute Cucumber Test Suite
+        run: |
+          npm test || true
+        env:
+          ENV: ${{ github.event.inputs.environment || 'qa' }}
+          BROWSER: ${{ github.event.inputs.browser || 'chromium' }}
+          HEADLESS: 'true'
+          CI: 'true'
+
+      # 2. Generate the Extent-style HTML report via generate-report.cjs
+      - name: Generate HTML Report
+        if: always()
+        run: node generate-report.cjs
+        env:
+          ENV: ${{ github.event.inputs.environment || 'qa' }}
+          BROWSER: ${{ github.event.inputs.browser || 'chromium' }}
+
+      # 3. Upload the generated HTML report and artifacts
+      - name: Upload Test Report & Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cucumber-html-report
+          path: |
+            reports/html-report/
+            reports/screenshots/
+            reports/videos/
+            reports/cucumber-report.json
+          retention-days: 14
+
+      # 4. Check the JSON report to mark the pipeline step failed if any test failed
+      - name: Check Overall Test Status
+        if: always()
+        run: |
+          node -e "
+            const fs = require('fs');
+            const reportPath = 'reports/cucumber-report.json';
+            if (!fs.existsSync(reportPath)) {
+              console.error('reports/cucumber-report.json was not generated!');
+              process.exit(1);
+            }
+            const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+            let hasFailures = false;
+            for (const feature of report) {
+              for (const element of (feature.elements || [])) {
+                for (const step of (element.steps || [])) {
+                  if (step.result && step.result.status === 'failed') {
+                    hasFailures = true;
+                    console.error('Failed step in scenario: ' + element.name);
+                  }
+                }
+              }
+            }
+            if (hasFailures) {
+              console.error('Pipeline failed due to one or more failing scenarios.');
+              process.exit(1);
+            }
+            console.log('All Cucumber scenarios passed successfully.');
+          "

@@ -23,16 +23,24 @@ export class BrowserFactory {
   static getContextOptions(deviceName?: string): BrowserContextOptions {
     const targetDevice = deviceName || config.device;
 
+    // Common video recording configuration for all contexts
+    const videoConfig = {
+      recordVideo: {
+        dir: 'reports/videos/',
+        size: { width: 1280, height: 720 },
+      },
+    };
+
     if (targetDevice && devices[targetDevice]) {
       return {
         ...devices[targetDevice],
-        recordVideo: { dir: 'reports/videos/' },
+        ...videoConfig,
       };
     }
 
     return {
       viewport: { width: 1920, height: 1080 },
-      recordVideo: { dir: 'reports/videos/' },
+      ...videoConfig,
     };
   }
 }

@@ -39,7 +39,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: 'npm'
 
       - name: Install Project Dependencies
@@ -51,17 +51,16 @@ jobs:
       - name: Ensure Reports Directory Exists
         run: mkdir -p reports
 
-      # 1. Run Cucumber tests and produce JSON output
+      # 1. Execute tests without aborting the workflow on failure
       - name: Execute Cucumber Test Suite
-        run: |
-          npm test || true
+        run: npm test || true
         env:
           ENV: ${{ github.event.inputs.environment || 'qa' }}
           BROWSER: ${{ github.event.inputs.browser || 'chromium' }}
           HEADLESS: 'true'
           CI: 'true'
 
-      # 2. Generate the Extent-style HTML report via generate-report.cjs
+      # 2. Generate the Extent-style HTML report
       - name: Generate HTML Report
         if: always()
         run: node generate-report.cjs
@@ -69,28 +68,25 @@ jobs:
           ENV: ${{ github.event.inputs.environment || 'qa' }}
           BROWSER: ${{ github.event.inputs.browser || 'chromium' }}
 
-      # 3. Upload the generated HTML report and artifacts
+      # 3. Upload the entire reports/ directory
       - name: Upload Test Report & Artifacts
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cucumber-html-report
-          path: |
-            reports/html-report/
-            reports/screenshots/
-            reports/videos/
-            reports/cucumber-report.json
+          name: full-execution-report
+          path: reports/
+          if-no-files-found: warn
           retention-days: 14
 
-      # 4. Check the JSON report to mark the pipeline step failed if any test failed
-      - name: Check Overall Test Status
+      # 4. Enforce pass/fail status in GitHub Actions based on test results
+      - name: Verify Test Results
         if: always()
         run: |
           node -e "
             const fs = require('fs');
             const reportPath = 'reports/cucumber-report.json';
             if (!fs.existsSync(reportPath)) {
-              console.error('reports/cucumber-report.json was not generated!');
+              console.error('Cucumber JSON report file was not found!');
               process.exit(1);
             }
             const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
@@ -106,7 +102,7 @@ jobs:
               }
             }
             if (hasFailures) {
-              console.error('Pipeline failed due to one or more failing scenarios.');
+              console.error('Suite contains failed scenarios.');
               process.exit(1);
             }
             console.log('All Cucumber scenarios passed successfully.');

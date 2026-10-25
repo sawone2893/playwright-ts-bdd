@@ -1,12 +1,11 @@
 name: Playwright Cucumber E2E Pipeline
 
-# Controls when the pipeline triggers
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch: # Allows manual trigger from GitHub UI with custom inputs
+  workflow_dispatch:
     inputs:
       environment:
         description: 'Target Environment'
@@ -34,75 +33,38 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      # 1. Pull down repository source code
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      # 2. Setup Node.js runtime and cache npm dependencies
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
 
-      # 3. Clean install npm packages
       - name: Install Project Dependencies
         run: npm ci
 
-      # 4. Install Playwright browser engines and system-level OS libraries
       - name: Install Playwright Browsers & OS Dependencies
         run: npx playwright install --with-deps
 
-      # 5. Execute Cucumber tests
-      # '|| true' ensures that even if tests fail, step exit code does not abort the workflow before reporting
+      # Run test suite directly without '|| true'
       - name: Execute Cucumber Test Suite
-        run: |
-          npm run test:report || true
+        run: npm test
         env:
           ENV: ${{ github.event.inputs.environment || 'qa' }}
           BROWSER: ${{ github.event.inputs.browser || 'chromium' }}
           HEADLESS: 'true'
           CI: 'true'
 
-      # 6. Upload HTML Report & Failure Media as Build Artifacts
-      # 'if: always()' ensures reports upload whether tests pass, fail, or timeout
+      # Upload report & failure artifacts whether tests pass or fail
       - name: Upload Test Report & Artifacts
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cucumber-html-report
+          name: cucumber-report
           path: |
-            reports/html-report/
+            reports/html-report/index.html
             reports/screenshots/
             reports/videos/
-            reports/cucumber-report.json
           retention-days: 14
-
-      # 7. Fail the pipeline job if the Cucumber JSON report indicates failed steps
-      - name: Check Overall Test Status
-        run: |
-          node -e "
-            const fs = require('fs');
-            const reportPath = 'reports/cucumber-report.json';
-            if (!fs.existsSync(reportPath)) {
-              console.error('Cucumber JSON report file was not generated!');
-              process.exit(1);
-            }
-            const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
-            let hasFailures = false;
-            for (const feature of report) {
-              for (const element of (feature.elements || [])) {
-                for (const step of (element.steps || [])) {
-                  if (step.result && step.result.status === 'failed') {
-                    hasFailures = true;
-                    console.error('Failed step found in scenario: ' + element.name);
-                  }
-                }
-              }
-            }
-            if (hasFailures) {
-              console.error('Test suite completed with failures.');
-              process.exit(1);
-            }
-            console.log('All Cucumber scenarios passed successfully.');
-          "

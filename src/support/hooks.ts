@@ -5,6 +5,7 @@ import * as path from 'path';
 import { CustomWorld } from './custom-world';
 import { BrowserFactory } from './browser-factory';
 import { config } from './config';
+import { PageManager } from '../pages/PageManager';
 
 setDefaultTimeout(config.defaultTimeout);
 
@@ -25,6 +26,8 @@ Before(async function (this: CustomWorld) {
   const contextOptions = BrowserFactory.getContextOptions();
   this.context = await browser.newContext(contextOptions);
   this.page = await this.context.newPage();
+  // Scoped strictly to this scenario's thread:
+  this.pageManager = new PageManager(this.page);
 });
 
 After(async function (this: CustomWorld, scenario) {

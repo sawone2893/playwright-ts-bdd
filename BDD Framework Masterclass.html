@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Playwright + Cucumber BDD 7-Day Masterclass | Full Instructor Speaking Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-canvas: #090d16;
+      --bg-surface: #101626;
+      --bg-card: #151d33;
+      --bg-code: #0b1120;
+      --border-subtle: #1e293b;
+      --border-accent: #334155;
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.15);
+      --emerald: #34d399;
+      --amber: #fbbf24;
+      --rose: #fb7185;
+      --indigo: #818cf8;
+      --purple: #c084fc;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --sidebar-width: 320px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-canvas);
+      color: var(--text-main);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Sidebar Navigation */
+    aside.sidebar {
+      width: var(--sidebar-width);
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+    }
+
+    .brand-text h1 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .brand-text span {
+      font-size: 11px;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+    }
+
+    .nav-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      text-decoration: none;
+      user-select: none;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+    }
+
+    .nav-item.active {
+      background: var(--primary-glow);
+      border-color: rgba(56, 189, 248, 0.3);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .nav-item-day {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .day-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 3px 7px;
+      border-radius: 4px;
+      color: #cbd5e1;
+    }
+
+    .nav-item.active .day-badge {
+      background: var(--primary);
+      color: #0b1120;
+      font-weight: 700;
+    }
+
+    .time-badge {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-dim);
+    }
+
+    .instructor-footer {
+      padding: 16px;
+      border-top: 1px solid var(--border-subtle);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .instructor-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    /* Main Content */
+    main.content {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      padding: 40px 48px;
+      max-width: 1200px;
+    }
+
+    /* Header Bar */
+    .top-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    .breadcrumbs span.current {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .view-toggle {
+      display: flex;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      padding: 4px;
+      border-radius: 8px;
+    }
+
+    .toggle-opt {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .toggle-opt.active {
+      background: var(--primary);
+      color: #0b1120;
+    }
+
+    .timer-deck {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    .timer-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--emerald);
+    }
+
+    .timer-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .timer-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Day Banner */
+    .day-banner {
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.6) 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .day-banner::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--primary);
+    }
+
+    .day-meta-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 12px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .day-title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .day-objective {
+      color: var(--text-muted);
+      font-size: 15px;
+      max-width: 850px;
+    }
+
+    /* Distribution Pills */
+    .time-distribution {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .dist-card {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .dist-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+    }
+
+    .dist-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-top: 2px;
+    }
+
+    /* Module Cards */
+    .module-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .module-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .module-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-pill {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .badge-blue { background: rgba(56, 189, 248, 0.15); color: var(--primary); }
+    .badge-green { background: rgba(52, 211, 153, 0.15); color: var(--emerald); }
+    .badge-amber { background: rgba(251, 191, 36, 0.15); color: var(--amber); }
+    .badge-rose { background: rgba(251, 113, 133, 0.15); color: var(--rose); }
+    .badge-purple { background: rgba(192, 132, 252, 0.15); color: var(--purple); }
+
+    .module-body {
+      padding: 24px;
+    }
+
+    /* Speech/Script Styling */
+    .speech-box {
+      background: rgba(192, 132, 252, 0.05);
+      border: 1px solid rgba(192, 132, 252, 0.25);
+      border-left: 4px solid var(--purple);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .speech-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--purple);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .speech-script {
+      font-size: 14.5px;
+      line-height: 1.7;
+      color: #e2e8f0;
+      font-style: italic;
+    }
+
+    .speech-script strong {
+      color: #fff;
+      font-style: normal;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
+    .speech-action {
+      margin-top: 10px;
+      font-size: 12.5px;
+      color: var(--amber);
+      font-style: normal;
+      font-family: 'JetBrains Mono', monospace;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Checklist */
+    .checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 14px;
+      color: #cbd5e1;
+    }
+
+    .check-box {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 2px solid var(--border-accent);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+      transition: all 0.2s;
+    }
+
+    .check-box.checked {
+      background: var(--emerald);
+      border-color: var(--emerald);
+    }
+
+    .check-box.checked::after {
+      content: '✓';
+      color: #0b1120;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    /* Code Blocks */
+    .code-container {
+      margin-top: 12px;
+      background: var(--bg-code);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.4);
+      border-bottom: 1px solid var(--border-subtle);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--border-accent);
+      color: var(--text-muted);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    pre code {
+      display: block;
+      padding: 16px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+
+    /* Pitfall Cards */
+    .pitfall-box {
+      background: rgba(251, 113, 133, 0.05);
+      border: 1px solid rgba(251, 113, 133, 0.2);
+      border-radius: 8px;
+      padding: 18px;
+      margin-top: 16px;
+    }
+
+    .pitfall-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--rose);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .pitfall-desc {
+      font-size: 13.5px;
+      color: #cbd5e1;
+    }
+
+    .trainer-tip {
+      background: rgba(251, 191, 36, 0.06);
+      border-left: 3px solid var(--amber);
+      padding: 14px 18px;
+      border-radius: 0 8px 8px 0;
+      font-size: 13.5px;
+      color: #cbd5e1;
+      margin-top: 16px;
+    }
+
+    .trainer-tip strong {
+      color: var(--amber);
+    }
+
+    /* Floating Navigation Controls */
+    .view-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      border-color: var(--primary);
+      background: rgba(56, 189, 248, 0.05);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #10b981;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      display: none;
+      z-index: 100;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 900px) {
+      aside.sidebar { display: none; }
+      main.content { margin-left: 0; padding: 20px; }
+      .time-distribution { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div class="brand-text">
+        <h1>BDD Framework Masterclass</h1>
+        <span>Instructor Cockpit</span>
+      </div>
+    </div>
+
+    <div class="nav-list" id="navList"></div>
+
+    <div class="instructor-footer">
+      <div class="instructor-card">
+        <div class="avatar">TR</div>
+        <div>
+          <div style="font-size: 12px; font-weight: 700; color: #fff;">Trainer Mode</div>
+          <div style="font-size: 11px; color: var(--text-dim);">Spoken Script Active</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Work Area -->
+  <main class="content">
+    <div class="top-meta">
+      <div class="breadcrumbs">
+        <span>Playwright Masterclass</span>
+        <span>/</span>
+        <span class="current" id="crumbDay">Day 1</span>
+      </div>
+
+      <div class="top-actions">
+        <div class="view-toggle">
+          <button class="toggle-opt active" id="btnScriptMode" onclick="toggleScriptMode(true)">🎙️ Script & Delivery</button>
+          <button class="toggle-opt" id="btnCodeMode" onclick="toggleScriptMode(false)">💻 Code Only</button>
+        </div>
+
+        <div class="timer-deck">
+          <span style="font-size: 12px; color: var(--text-dim);">TIMER:</span>
+          <div class="timer-display" id="timer">00:00:00</div>
+          <button class="timer-btn" id="startTimerBtn">Start</button>
+          <button class="timer-btn" id="resetTimerBtn">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Day Container -->
+    <div id="dayContentArea"></div>
+
+    <!-- Bottom Navigation -->
+    <div class="view-controls">
+      <button class="nav-btn" id="prevDayBtn">← Previous Day</button>
+      <button class="nav-btn" id="nextDayBtn">Next Day →</button>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">Code copied to clipboard!</div>
+
+  <script>
+    let showScript = true;
+
+    const curriculumData = [
+      {
+        day: 1,
+        title: "Modern Test Automation Foundations & Setup",
+        subtitle: "Node.js, TypeScript, and Playwright Core Architecture",
+        objective: "Understand how Playwright operates under the hood, initialize a strict TypeScript ECMAScript Module (ESM) project, and execute an isolated browser test without framework abstractions.",
+        distribution: { theory: "45 Mins", practice: "50 Mins", drill: "15 Mins", recap: "10 Mins" },
+        spokenOpening: "Welcome, everyone. Today we are setting the architectural foundation for an enterprise test automation framework. You might already know Selenium WebDriver, where every single command—whether a click, a findElement, or text input—is packaged into an HTTP JSON request sent across a local port to a separate driver executable. When you scale that to hundreds of tests, HTTP handshakes and port exhaustion become massive bottlenecks. Playwright fundamentally re-engineers this. It connects straight to the browser engine's internal Chrome DevTools Protocol over a persistent, duplex WebSocket. There is zero HTTP polling. More importantly, Playwright introduces the concept of lightweight Browser Contexts—meaning we can launch a single browser process and spin up dozens of isolated, private incognito sessions in milliseconds without the memory penalty of running multiple Chrome instances.",
+        theoryChecklist: [
+          "Selenium vs Playwright: HTTP JSON Wire protocol overhead vs direct CDP / WebSocket connections.",
+          "Process Hierarchy: Single heavy OS Browser process vs lightweight isolated BrowserContexts vs Pages.",
+          "ESM Standard: Why \"type\": \"module\" is mandatory in package.json to prevent modern import collisions.",
+          "TypeScript Runtime with tsx: In-memory compilation without separate, slow transpile-and-run steps."
+        ],
+        theoryLectureScript: "Let me draw this on the board for you. At the top level, we have the OS Browser Process. When you run Chromium or Firefox, your operating system allocates hundreds of megabytes of memory. In legacy frameworks, to get clean cookies, you had to shut down and reopen that heavy process for every scenario. In Playwright, that process launches once. Underneath it, we create a BrowserContext. Think of a BrowserContext like opening a brand new Incognito tab: its cookies, local storage, indexedDB, and cache are 100% isolated. Opening a Context takes about 15 milliseconds and uses negligible RAM. Under the Context, you have the Page—your actual tab. This 3-tier hierarchy is why our framework will execute 5 times faster than standard Selenium suites.",
+        trainerTips: "Draw the process tree on the board: 1 OS Browser process running 4 isolated contexts side-by-side. Make students see that they don't need 4 separate browsers to get clean cookies.",
+        practicalSteps: [
+          {
+            title: "Step 1: Initialize Workspace & Install Binaries",
+            desc: "Run terminal commands to install dependencies and required OS-level browser packages:",
+            voiceover: "Alright team, open your VS Code terminal. Let's create our workspace folder. Notice we are installing @types/node right at the start. If you skip @types/node, TypeScript will immediately throw an error when we touch process.env later. Let's run these commands together.",
+            code: "mkdir playwright-bdd-framework && cd playwright-bdd-framework\nnpm init -y\nnpm install --save-dev @playwright/test typescript tsx @types/node\nnpx playwright install --with-deps chromium"
+          },
+          {
+            title: "Step 2: Setup Strict tsconfig.json",
+            desc: "Add types: [\"node\"] to prevent 'Cannot find name process' and set moduleResolution to bundler:",
+            voiceover: "Now open tsconfig.json. Pay very close attention to three keys: first, rootDir must be set to ./ to prevent common source root errors. Second, moduleResolution must be bundler. If you leave it at node10, Node will throw deprecation warnings in modern versions. Third, types must include node.",
+            code: '{\n  "compilerOptions": {\n    "target": "ES2022",\n    "module": "ESNext",\n    "moduleResolution": "bundler",\n    "rootDir": "./",\n    "outDir": "./dist",\n    "types": ["node"],\n    "esModuleInterop": true,\n    "strict": true,\n    "skipLibCheck": true,\n    "resolveJsonModule": true\n  },\n  "include": ["src/**/*"]\n}'
+          },
+          {
+            title: "Step 3: Direct Native Test (src/sample.ts)",
+            desc: "Write pure Playwright code without any abstractions to cement the core concepts:",
+            voiceover: "Let's create src/sample.ts. Notice how we explicitly instantiate browser, then context, then page. When we execute this, watch how fast the context opens and closes. Notice also that we don't have explicit sleep calls—Playwright locators auto-wait for elements to be visible and stable before clicking.",
+            code: "import { chromium } from '@playwright/test';\n\nasync function run() {\n  console.log('Launching browser process...');\n  const browser = await chromium.launch({ headless: false, slowMo: 300 });\n  const context = await browser.newContext();\n  const page = await context.newPage();\n\n  await page.goto('https://www.saucedemo.com');\n  await page.locator('#user-name').fill('standard_user');\n  await page.locator('#password').fill('secret_sauce');\n  await page.locator('#login-button').click();\n\n  console.log('Header text:', await page.locator('.title').textContent());\n  await context.close();\n  await browser.close();\n}\nrun();"
+          }
+        ],
+        pitfall: {
+          title: "Debugging Drill: Missing Types & Unhandled Promises",
+          desc: "Have students delete '@types/node' or omit 'await' from page.goto(). Show how TypeScript red-lines 'process.env' and how Node unhandled rejections crash tests silently.",
+          spokenWalkthrough: "Everyone, let's intentionally break our code. Remove the await keyword right before page.goto(). Now run tsx src/sample.ts. Notice what happens: JavaScript returns a pending Promise and immediately moves to the next line before the page has even loaded! The test crashes with element not found. In modern automation, forgetting await is the number one cause of flaky tests. Always verify that asynchronous Playwright actions are properly awaited."
+        },
+        spokenClosing: "Today you proved the core architecture. You saw the browser, the context, and the page interacting directly via WebSockets. Tomorrow, we take this engine and marry it with Behavior-Driven Development using Cucumber.js and Gherkin."
+      },
+      {
+        day: 2,
+        title: "BDD Principles & Cucumber Integration with ESM",
+        subtitle: "Feature Files, Step Definitions, and in-memory tsx Execution",
+        objective: "Integrate Cucumber.js into the TypeScript ESM environment, establish Gherkin standards, and execute step definitions using in-memory compilation (tsx).",
+        distribution: { theory: "45 Mins", practice: "50 Mins", drill: "15 Mins", recap: "10 Mins" },
+        spokenOpening: "Welcome back. Yesterday we wrote raw Playwright scripts. But in real-world organizations, non-technical stakeholders—product owners, business analysts, and compliance officers—cannot read TypeScript code. That is where Behavior-Driven Development comes in. Gherkin is not just documentation; it is executable specification. Today, we will integrate Cucumber.js into our TypeScript ECMAScript Module setup. We will learn why legacy ts-node loaders crash on Node v20+, and how modern tools like tsx compile TypeScript on the fly in memory with zero fuss.",
+        theoryChecklist: [
+          "Behavior-Driven Development (BDD): Bridging communication between Product, QA, and Engineering.",
+          "Gherkin Syntax Standards: Declarative ('When user logs in') vs Imperative ('When user clicks input with id user-name').",
+          "Cucumber.js Runner Mechanics: How cucumber.json matches Gherkin lines with regex/expressions.",
+          "ESM Compatibility: Using tsx directly in test execution scripts to bypass ts-node ESM loader issues."
+        ],
+        theoryLectureScript: "Let's talk about Gherkin design principles. The biggest mistake new QA engineers make is writing imperative steps. For example: 'When I click input user-name and type standard_user and click button with class btn-primary'. If your UI designer changes a button to a link, your entire feature file is ruined! BDD steps should describe business behavior: 'When the user enters valid credentials'. Keep the technical selectors inside the code, and keep the English business logic inside the feature file.",
+        trainerTips: "Emphasize writing business-readable specifications. Show an example of brittle, locator-heavy Gherkin and show why it costs 10x more maintenance time.",
+        practicalSteps: [
+          {
+            title: "Step 1: Install Cucumber Core Dependencies",
+            desc: "Install Cucumber and cross-env for platform-independent CLI runs:",
+            voiceover: "Let's install @cucumber/cucumber and cross-env. We use cross-env so that our scripts work seamlessly whether you are on Windows PowerShell, macOS, or an Ubuntu CI runner.",
+            code: "npm install --save-dev @cucumber/cucumber cross-env"
+          },
+          {
+            title: "Step 2: Create cucumber.json",
+            desc: "Map feature files and step definition import targets:",
+            voiceover: "Now create cucumber.json at your root. Notice the import array: we tell Cucumber to scan all TypeScript files in src/steps. Because we run via tsx, Cucumber will transpile these files directly in memory.",
+            code: '{\n  "default": {\n    "paths": ["features/**/*.feature"],\n    "import": ["src/steps/**/*.ts"],\n    "format": ["summary"],\n    "parallel": 1\n  }\n}'
+          },
+          {
+            title: "Step 3: Create features/login.feature",
+            desc: "Standard Gherkin scenario with parameters:",
+            voiceover: "Look at the Gherkin scenario. We use the {string} parameter syntax. Notice the Given, When, and Then structure: Given establishes preconditions, When represents the user action, and Then asserts the outcome.",
+            code: "@auth\nFeature: User Authentication\n\n  Scenario: Successful login with valid credentials\n    Given the user navigates to the login page\n    When the user enters username \"standard_user\" and password \"secret_sauce\"\n    Then the user should see the dashboard page"
+          },
+          {
+            title: "Step 4: Create src/steps/login.steps.ts",
+            desc: "Basic step bindings connected to Playwright:",
+            voiceover: "Here we connect the Gherkin English steps to Playwright logic. When Cucumber sees {string}, it extracts the text between quotes and passes it as arguments into our step function.",
+            code: "import { Given, When, Then } from '@cucumber/cucumber';\nimport { chromium, Browser, Page } from '@playwright/test';\nimport assert from 'assert';\n\nlet browser: Browser;\nlet page: Page;\n\nGiven('the user navigates to the login page', async function () {\n  browser = await chromium.launch({ headless: false });\n  page = await browser.newPage();\n  await page.goto('https://www.saucedemo.com');\n});\n\nWhen('the user enters username {string} and password {string}', async function (u: string, p: string) {\n  await page.locator('#user-name').fill(u);\n  await page.locator('#password').fill(p);\n  await page.locator('#login-button').click();\n});\n\nThen('the user should see the dashboard page', async function () {\n  const title = await page.locator('.title').textContent();\n  assert.strictEqual(title, 'Products');\n  await browser.close();\n});"
+          }
+        ],
+        pitfall: {
+          title: "Debugging Drill: Step Definition Mismatch",
+          desc: "Intentionally misspell one word in a Gherkin step. Have students run the test and observe how Cucumber displays the missing snippet in the console output ready for copying.",
+          spokenWalkthrough: "Watch my screen: I am changing 'Then the user should see the dashboard page' to 'Then the user sees the dashboard page'. Now I run npm test. Cucumber halts immediately and tells us: 'Undefined. Implement with the following snippet'. Whenever you see this yellow warning, do not panic! Cucumber is literally writing the boilerplate code for you in the terminal. Copy it, paste it, and write the logic."
+        },
+        spokenClosing: "Great work! You now have a working BDD pipeline. But notice a dangerous flaw: we declared `let browser` and `let page` globally in the file. Tomorrow, we will see why that completely breaks down when we run tests in parallel, and how we solve it with CustomWorld."
+      },
+      {
+        day: 3,
+        title: "State Isolation, Lifecycle & Thread Safety",
+        subtitle: "CustomWorld, BrowserFactory, and Dynamic Device Emulation",
+        objective: "Resolve global state collisions in parallel execution by building a thread-safe CustomWorld, a dynamic BrowserFactory, and structured lifecycle hooks.",
+        distribution: { theory: "45 Mins", practice: "50 Mins", drill: "15 Mins", recap: "10 Mins" },
+        spokenOpening: "Good morning. Today is the most critical architectural session of the entire week: thread safety and state isolation. Right now, our framework works for one scenario. But what happens when our test suite grows to 500 scenarios and we need to run 4 tests at the exact same second in parallel? If all 4 tests share a single global `page` variable, Test 2 will overwrite the URL of Test 1 mid-execution! Today, we eliminate global variables forever by building a thread-safe CustomWorld and a BrowserFactory.",
+        theoryChecklist: [
+          "The Shared-State Trap: Why global variables (`let page: Page`) break when running `--parallel 4`.",
+          "The World Object: Cucumber creates a brand new instance for every scenario; binding `this.page` guarantees isolation.",
+          "The Browser Factory: Centralizing browser instantiation (Chromium, Firefox, WebKit) and device emulation.",
+          "Lifecycle Sequence: BeforeAll (once) -> Before (per scenario) -> Steps -> After (per scenario) -> AfterAll (once)."
+        ],
+        theoryLectureScript: "In Cucumber, the 'World' is an isolated context created fresh for every single scenario. If you have 5 scenarios, Cucumber instantiates 5 separate World objects. By attaching our Playwright `context` and `page` directly to the `this` keyword inside the World, Scenario A has its own `this.page`, and Scenario B has its own completely separate `this.page`. They can run concurrently without ever stepping on each other's toes.",
+        trainerTips: "Show students how 4 tests running concurrently with a single global `let page` will constantly overwrite each other's navigation, causing flaky, race-condition failures.",
+        practicalSteps: [
+          {
+            title: "Step 1: Create src/support/custom-world.ts",
+            desc: "Subclass Cucumber's World to attach scenario-scoped driver properties:",
+            voiceover: "We subclass Cucumber's World and register it with setWorldConstructor. Now, throughout any step definition or hook, TypeScript knows that `this.page` exists and belongs solely to that running scenario.",
+            code: "import { setWorldConstructor, World, IWorldOptions } from '@cucumber/cucumber';\nimport { Browser, BrowserContext, Page } from '@playwright/test';\n\nexport interface CustomWorld extends World {\n  browser?: Browser;\n  context?: BrowserContext;\n  page?: Page;\n}\n\nexport class CustomWorldImpl extends World implements CustomWorld {\n  browser?: Browser;\n  context?: BrowserContext;\n  page?: Page;\n\n  constructor(options: IWorldOptions) {\n    super(options);\n  }\n}\n\nsetWorldConstructor(CustomWorldImpl);"
+          },
+          {
+            title: "Step 2: Create src/support/browser-factory.ts",
+            desc: "Multi-browser and mobile device emulation provider:",
+            voiceover: "Now let's build the BrowserFactory. Instead of scattering `chromium.launch()` across your codebase, this factory acts as a central hub. It accepts an environment variable: BROWSER=firefox or DEVICE='iPhone 13', and returns the configured browser or options automatically.",
+            code: "import { chromium, firefox, webkit, Browser, devices, BrowserContextOptions } from '@playwright/test';\n\nexport type BrowserType = 'chromium' | 'firefox' | 'webkit';\n\nexport class BrowserFactory {\n  static async getBrowser(browserName: BrowserType = 'chromium'): Promise<Browser> {\n    const options = { headless: process.env.HEADLESS !== 'false' };\n    switch (browserName.toLowerCase()) {\n      case 'firefox': return await firefox.launch(options);\n      case 'webkit': return await webkit.launch(options);\n      default: return await chromium.launch(options);\n    }\n  }\n\n  static getContextOptions(deviceName?: string): BrowserContextOptions {\n    if (deviceName && devices[deviceName]) {\n      return { ...devices[deviceName], recordVideo: { dir: 'reports/videos/' } };\n    }\n    return { viewport: { width: 1920, height: 1080 }, recordVideo: { dir: 'reports/videos/' } };\n  }\n}"
+          },
+          {
+            title: "Step 3: Build Lifecycle Hooks (src/support/hooks.ts)",
+            desc: "Bind context and page instances directly to this in Before / After hooks:",
+            voiceover: "Look at hooks.ts. In BeforeAll, the heavy browser process starts once. In Before, for each individual scenario, we open a lightweight context and a new page, and assign them directly to `this.context` and `this.page`. In After, we close that page and context so memory is immediately freed.",
+            code: "import { Before, After, BeforeAll, AfterAll, setDefaultTimeout } from '@cucumber/cucumber';\nimport { Browser } from '@playwright/test';\nimport { CustomWorld } from './custom-world';\nimport { BrowserFactory, BrowserType } from './browser-factory';\n\nsetDefaultTimeout(60000);\nlet browser: Browser;\n\nBeforeAll(async function () {\n  const browserType = (process.env.BROWSER as BrowserType) || 'chromium';\n  browser = await BrowserFactory.getBrowser(browserType);\n});\n\nAfterAll(async function () {\n  if (browser) await browser.close();\n});\n\nBefore(async function (this: CustomWorld) {\n  this.browser = browser;\n  this.context = await browser.newContext(BrowserFactory.getContextOptions(process.env.DEVICE));\n  this.page = await this.context.newPage();\n});\n\nAfter(async function (this: CustomWorld) {\n  await this.page?.close();\n  await this.context?.close();\n});"
+          }
+        ],
+        pitfall: {
+          title: "Debugging Drill: The Arrow Function Lexical Trap",
+          desc: "Have a student replace `async function (this: CustomWorld)` with an arrow function `async () =>`. Run the test and note the runtime error: 'Cannot read properties of undefined (reading page)'",
+          spokenWalkthrough: "Let's perform this critical drill: change `Before(async function (this: CustomWorld) {` to `Before(async () => {`. Now run the test. Crash! Why? In JavaScript, arrow functions do NOT have their own `this`. They capture the outer lexical scope. When you use an arrow function in Cucumber hooks or steps, you completely sever your access to the CustomWorld. Always use standard `function()` syntax so Cucumber can inject `this`."
+        },
+        spokenClosing: "Look at your terminal now: you can run `npm test -- --parallel 4` and watch 4 scenarios run concurrently without a single conflict. Tomorrow, we start structuring our Page Object Model with a rock-solid BasePage."
+      },
+      {
+        day: 4,
+        title: "Advanced Page Object Model (POM) & Locators",
+        subtitle: "Decoupling Steps with a Resilient BasePage Wrapper",
+        objective: "Eliminate raw locator strings from step definitions by creating an enterprise BasePage wrapper with unified logging and auto-waiting assertions.",
+        distribution: { theory: "45 Mins", practice: "50 Mins", drill: "15 Mins", recap: "10 Mins" },
+        spokenOpening: "Welcome to Day 4. Yesterday we mastered state isolation. Today, we tackle maintainability. Imagine an enterprise application with 400 test cases. In 80 of those test cases, the user logs in. If the developer changes the login button ID from `#login-button` to `#submit-btn`, and you hardcoded `#login-button` inside your step definitions, you now have to find and modify 80 different places in your code! That is a maintenance nightmare. Today, we implement the Page Object Model backed by an abstract BasePage wrapper.",
+        theoryChecklist: [
+          "POM Anti-Patterns: Why exposing raw locators or asserting inside interaction methods breaks reusability.",
+          "The BasePage Layer: Centralizing visibility waiting, click handling, and text entry.",
+          "Locator Engine: Leveraging Playwright's auto-waiting locators and filter chaining instead of brittle XPaths.",
+          "Component Reusability: Creating clean, single-responsibility page classes."
+        ],
+        theoryLectureScript: "Let me explain the two cardinal rules of Page Object architecture. Rule Number One: Step definitions should NEVER contain CSS selectors or XPaths. Selectors belong exclusively in Page Objects. Rule Number Two: Page Objects should represent actions and queries; they should not contain hard test assertions that exit the runner. Why? Because you might want to reuse `login()` in both positive and negative scenarios.",
+        trainerTips: "Show how a CSS selector change across 10 steps requires updating 10 files if POM isn't used, but only 1 line in a dedicated Page class.",
+        practicalSteps: [
+          {
+            title: "Step 1: Create src/pages/BasePage.ts",
+            desc: "Abstract base class wrapping common interactions with explicit visibility waits:",
+            voiceover: "We create BasePage as an abstract class. Look at the methods: goto, click, type, expectToBeVisible. Notice that every action explicitly checks for visibility before executing. If we ever want to add central logging or performance tracking across all clicks in our framework, we only edit this one file.",
+            code: "import { Page, Locator, expect } from '@playwright/test';\n\nexport abstract class BasePage {\n  readonly page: Page;\n  constructor(page: Page) { this.page = page; }\n\n  async goto(url: string): Promise<void> {\n    await this.page.goto(url, { waitUntil: 'domcontentloaded' });\n  }\n\n  protected getLocator(selector: string | Locator): Locator {\n    return typeof selector === 'string' ? this.page.locator(selector) : selector;\n  }\n\n  async click(selector: string | Locator): Promise<void> {\n    const el = this.getLocator(selector);\n    await el.waitFor({ state: 'visible' });\n    await el.click();\n  }\n\n  async type(selector: string | Locator, text: string): Promise<void> {\n    const el = this.getLocator(selector);\n    await el.waitFor({ state: 'visible' });\n    await el.fill('');\n    await el.fill(text);\n  }\n\n  async expectToHaveText(selector: string | Locator, text: string): Promise<void> {\n    await expect(this.getLocator(selector)).toHaveText(text);\n  }\n}"
+          },
+          {
+            title: "Step 2: Build Application Pages (src/pages/LoginPage.ts)",
+            desc: "Dedicated page class encapsulating selectors and user workflows:",
+            voiceover: "Now create LoginPage. Notice how the locators are private readonly properties. Outside classes cannot manipulate the raw selectors; they must use the public action methods like login().",
+            code: "import { Page } from '@playwright/test';\nimport { BasePage } from './BasePage';\n\nexport class LoginPage extends BasePage {\n  private readonly usernameInput = '#user-name';\n  private readonly passwordInput = '#password';\n  private readonly loginButton = '#login-button';\n  private readonly errorMessage = '[data-test=\"error\"]';\n\n  constructor(page: Page) { super(page); }\n\n  async navigate(): Promise<void> { await this.goto('https://www.saucedemo.com'); }\n\n  async login(u: string, p: string): Promise<void> {\n    await this.type(this.usernameInput, u);\n    await this.type(this.passwordInput, p);\n    await this.click(this.loginButton);\n  }\n\n  async verifyError(text: string): Promise<void> {\n    await this.expectToHaveText(this.errorMessage, text);\n  }\n}"
+          },
+          {
+            title: "Step 3: Refactor Steps to Instantiate Pages Cleanly",
+            desc: "Instantiate the page object inside the step definition via this.page!:",
+            voiceover: "Look at the updated step definition. We instantiate `new LoginPage(this.page!)` directly inside the step. The step definition now reads like plain English and contains zero DOM knowledge.",
+            code: "import { Given, When } from '@cucumber/cucumber';\nimport { CustomWorld } from '../support/custom-world';\nimport { LoginPage } from '../pages/LoginPage';\n\nGiven('the user navigates to the login page', async function (this: CustomWorld) {\n  const loginPage = new LoginPage(this.page!);\n  await loginPage.navigate();\n});\n\nWhen('the user logs in with credentials {string} and {string}', async function (this: CustomWorld, u: string, p: string) {\n  const loginPage = new LoginPage(this.page!);\n  await loginPage.login(u, p);\n});"
+          }
+        ],
+        pitfall: {
+          title: "Debugging Drill: Premature Page Instantiation",
+          desc: "Have a student instantiate `const loginPage = new LoginPage(this.page!)` outside of a step definition at the file root. Observe the null pointer error because `this.page` hasn't been instantiated by the hook yet.",
+          spokenWalkthrough: "Let's test this error: instantiate `const loginPage = new LoginPage(this.page!)` at the very top of `login.steps.ts` outside any function. Run the test. Why did it fail? Because when the test runner loads the file, `Before` hasn't run yet! `this.page` is undefined. Always instantiate your Page Objects inside the step where `this.page` is live."
+        },
+        spokenClosing: "Your code is now clean, modular, and readable. Tomorrow on Day 5, we will make our framework enterprise-ready by introducing dynamic environment management and typed data tables."
+      },
+      {
+        day: 5,
+        title: "Data Management, Type Casting & Dynamic Environments",
+        subtitle: "Custom DataTableType, ParameterTypes, and Dynamic env/ Loading",
+        objective: "Support multi-tier deployments (dev, qa, staging) using dynamic environment loaders, and transform complex Gherkin data tables into typed TypeScript interfaces.",
+        distribution: { theory: "45 Mins", practice: "50 Mins", drill: "15 Mins", recap: "10 Mins" },
+        spokenOpening: "Welcome to Day 5. In any serious enterprise, your software doesn't just exist in one place. You have a development environment, a QA testing environment, and a staging or pre-production environment. If your test framework has URLs or passwords hardcoded into files, you cannot plug it into a dynamic deployment pipeline. Today, we will build a centralized environment manager using dedicated `.env` files in an `env/` directory. We will also learn how to transform raw Gherkin data tables into typed TypeScript objects using Cucumber's `defineDataTableType`.",
+        theoryChecklist: [
+          "Environment Parity: Loading credentials and base URLs dynamically via `.env.<ENV>` files.",
+          "Avoiding Plaintext Secrets: Abstracting usernames and passwords behind role configs.",
+          "Cucumber Transformers: Converting raw string matrices (`string[][]`) into strongly typed objects.",
+          "Custom Parameter Types: Parsing custom tokens directly in step definition strings."
+        ],
+        theoryLectureScript: "By default, when you write a data table in Gherkin, Cucumber delivers it to your step definition as an untyped 2D array of strings. If you want properties like `quantity` to be numbers, or `price` to be floats, you would normally have to write `parseInt()` in every single step definition. Instead, we use `defineDataTableType`. We tell Cucumber: 'Whenever you see a table with headers productName and quantity, automatically convert it into our ProductItem TypeScript interface before giving it to our step'.",
+        trainerTips: "Demonstrate switching environments with a single command line switch: `cross-env ENV=dev npm test` vs `cross-env ENV=qa npm test`.",
+        practicalSteps: [
+          {
+            title: "Step 1: Setup env/ Directory and Files",
+            desc: "Create env/.env.qa with environment-specific values:",
+            voiceover: "Let's create an `env/` folder. Inside it, we create `.env.qa` and `.env.dev`. Notice we never commit production secrets into Git; our `.gitignore` will ignore all `.env` files except `.env.example`.",
+            code: "ENV=qa\nBASE_URL=https://www.saucedemo.com\nBROWSER=chromium\nHEADLESS=true\nSTANDARD_USERNAME=standard_user\nSTANDARD_PASSWORD=secret_sauce"
+          },
+          {
+            title: "Step 2: Create Dynamic Config Loader (src/support/config.ts)",
+            desc: "Dynamically load environment variables via dotenv with fallbacks:",
+            voiceover: "Look at config.ts. It checks `process.env.ENV`. If you pass `ENV=dev`, it loads `env/.env.dev`. If you pass nothing, it falls back safely to QA. All variables are exported in a typed `config` object with auto-completion.",
+            code: "import * as dotenv from 'dotenv';\nimport * as path from 'path';\nimport * as fs from 'fs';\n\nconst activeEnv = process.env.ENV || 'qa';\nconst targetPath = path.resolve(process.cwd(), `env/.env.${activeEnv}`);\nif (fs.existsSync(targetPath)) dotenv.config({ path: targetPath, override: true });\n\nexport const config = {\n  env: activeEnv,\n  baseUrl: process.env.BASE_URL || 'https://www.saucedemo.com',\n  browser: process.env.BROWSER || 'chromium',\n  headless: process.env.HEADLESS !== 'false',\n  users: {\n    standard: {\n      username: process.env.STANDARD_USERNAME || 'standard_user',\n      password: process.env.STANDARD_PASSWORD || 'secret_sauce'\n    }\n  }\n};"
+          },
+          {
+            title: "Step 3: Register Custom DataTable Transformer",
+            desc: "Create src/support/data-table-types.ts to auto-cast Cucumber tables:",
+            voiceover: "Here is the custom transformer. Whenever a step requests `products: ProductItem[]`, Cucumber automatically parses the rows into our typed model, converting the quantity string into an actual integer.",
+            code: "import { defineDataTableType } from '@cucumber/cucumber';\n\nexport interface ProductItem {\n  productName: string;\n  quantity: number;\n}\n\ndefineDataTableType((entry: Record<string, string>): ProductItem => ({\n  productName: entry['productName'],\n  quantity: entry['quantity'] ? parseInt(entry['quantity'], 10) : 1,\n}));"
+          }
+        ],
+        pitfall: {
+          title: "Debugging Drill: Missing Type Registration in Cucumber",
+          desc: "Run tests without including `src/support/**/*.ts` in `cucumber.json`'s import list. Notice how Cucumber receives raw string arrays instead of your custom typed object, failing with an unhandled type error.",
+          spokenWalkthrough: "Let's comment out `src/support/**/*.ts` from cucumber.json and execute our checkout scenario. Cucumber fails with a TypeError: 'products.forEach is not a function'. Why? Because without the registration file loaded, Cucumber gave us a raw DataTable object instead of our mapped array. Always ensure your support directory is scanned by cucumber.json."
+        },
+        spokenClosing: "Now we can run tests across multiple environments effortlessly. Tomorrow is Day 6: we'll implement full-page failure screenshots, clean video pruning, and rich HTML reporting."
+      },
+      {
+        day: 6,
+        title: "Media Artifacts, Visuals & Reporting",
+        subtitle: "Failure Screenshots, Failed-Only Videos, and HTML Reports",
+        objective: "Implement selective video retention (discard videos for passing scenarios, retain for failures), capture full-page failure screenshots, and integrate the HTML reporting dashboard.",
+        distribution: { theory: "45 Mins", practice: "50 Mins", drill: "15 Mins", recap: "10 Mins" },
+        spokenOpening: "Welcome to Day 6. When an automated test fails on a CI server at 2:00 AM, the first thing an engineer asks is: 'What did the screen look like?' If you only have raw text logs, diagnosing subtle frontend bugs is painfully slow. Today, we implement automated visual evidence: full-page screenshots and video recordings. But there's a catch: saving videos for 1,000 passing tests wastes gigabytes of disk space. Today, we will build smart video retention that deletes passing videos and keeps ONLY failed recordings.",
+        theoryChecklist: [
+          "Artifact Retention Strategy: Why saving videos for 1,000 passed tests exhausts disk storage and slows CI runs.",
+          "Playwright Video Flush Lifecycle: Why `context.close()` MUST be awaited before inspecting or renaming video files on disk.",
+          "Attaching Media to Cucumber: Embedding screenshots and videos directly into test reports via `this.attach()`.",
+          "Cross-Platform Reporting: Resolving Node v22/v24 package exports compatibility using `.cjs` loader scripts."
+        ],
+        theoryLectureScript: "Pay very close attention to how Playwright handles video recording. Playwright records frames in a temporary buffer. That video file is NOT finalized or closed until you call `await context.close()`. If you try to rename, delete, or upload the video before closing the context, your operating system will throw a file-lock error. Our lifecycle must be exact: first, grab the video path reference. Second, close the page and context. Third, check if the scenario passed or failed, and delete or rename accordingly.",
+        trainerTips: "Show students your `reports/videos/` folder before and after the test run. Explain why discarding passed videos keeps CI artifacts lightweight and fast to download.",
+        practicalSteps: [
+          {
+            title: "Step 1: Implement Pruning Hooks in src/support/hooks.ts",
+            desc: "Capture screenshots on failure and selectively delete or rename videos:",
+            voiceover: "Look at the logic in our After hook. If `scenario.result?.status === Status.FAILED`, we take a fullPage screenshot and attach it to Cucumber. Then, we close the context. If the scenario passed, we call fs.unlinkSync to trash the video. If it failed, we rename it to the scenario name and attach it to the report.",
+            code: "After(async function (this: CustomWorld, scenario) {\n  const isFailed = scenario.result?.status === Status.FAILED;\n  const sanitized = scenario.pickle.name.replace(/[^a-zA-Z0-9]/g, '_');\n  let videoPath: string | null = null;\n\n  if (isFailed && this.page) {\n    const screenshot = await this.page.screenshot({ path: `reports/screenshots/${sanitized}.png`, fullPage: true });\n    this.attach(screenshot, 'image/png');\n  }\n\n  if (this.page && this.page.video()) videoPath = await this.page.video()!.path();\n\n  await this.page?.close();\n  await this.context?.close();\n\n  if (videoPath && fs.existsSync(videoPath)) {\n    if (!isFailed) {\n      fs.unlinkSync(videoPath);\n    } else {\n      const target = path.resolve('reports/videos', `${sanitized}.webm`);\n      fs.renameSync(videoPath, target);\n      this.attach(fs.readFileSync(target), 'video/webm');\n    }\n  }\n});"
+          },
+          {
+            title: "Step 2: Create generate-report.cjs with Node 22/24 Safe Loader",
+            desc: "Standalone script that loads the reporter and creates the HTML dashboard:",
+            voiceover: "Notice the `.cjs` extension. In modern Node 22 and 24, some legacy packages throw ERR_PACKAGE_PATH_NOT_EXPORTED. Our custom `loadReporter()` function catches this and resolves the file directly by path, guaranteeing it generates cleanly on any machine.",
+            code: "const os = require('os');\nconst fs = require('fs');\nconst path = require('path');\n\nfunction loadReporter() {\n  try { return require('multiple-cucumber-html-reporter'); }\n  catch (e) {\n    const pkgDir = path.resolve(process.cwd(), 'node_modules/multiple-cucumber-html-reporter');\n    const pkg = JSON.parse(fs.readFileSync(path.join(pkgDir, 'package.json'), 'utf8'));\n    return require(path.join(pkgDir, pkg.main || 'index.js'));\n  }\n}\n\nconst report = loadReporter();\nreport.generate({\n  jsonDir: './reports',\n  reportPath: './reports/html-report',\n  metadata: {\n    browser: { name: (process.env.BROWSER || 'chromium').toUpperCase() },\n    platform: { name: os.platform(), version: os.release() }\n  }\n});"
+          }
+        ],
+        pitfall: {
+          title: "Debugging Drill: File Lock Access Violation",
+          desc: "Attempt to call `fs.unlinkSync(videoPath)` BEFORE calling `await context.close()`. Show how Playwright's open file handle throws an `EBUSY: resource busy or locked` error on Windows machines.",
+          spokenWalkthrough: "Let's move `fs.unlinkSync(videoPath)` above `await context.close()`. Run the test. On Windows, you get an immediate EBUSY file lock error. Why? Because the browser process is actively writing frames to that file. You cannot delete a file that is open in another process. Always flush and close the context first."
+        },
+        spokenClosing: "Look at `reports/html-report/index.html`. You now have a searchable, interactive HTML dashboard showing exact step timings, embedded screenshots, and downloadable failure videos. Tomorrow is our final capstone: automating all of this in GitHub Actions CI/CD!"
+      },
+      {
+        day: 7,
+        title: "CI/CD Pipelines with GitHub Actions & Review",
+        subtitle: "Headless Runners, Artifact Retention, and Final Code Review",
+        objective: "Construct a cloud-ready GitHub Actions YAML pipeline, manage pipeline pass/fail status, upload execution artifacts, and conduct an end-to-end framework code review.",
+        distribution: { theory: "45 Mins", practice: "50 Mins", drill: "15 Mins", recap: "10 Mins" },
+        spokenOpening: "Welcome to Day 7—the grand finale! All week, we have been running tests locally on our own machines. But automation has zero value if it only lives on your laptop. In high-performing engineering teams, tests must execute automatically on every Pull Request and merge. Today, we build a production-grade CI/CD pipeline in GitHub Actions on an Ubuntu Linux runner. We will master pipeline triggers, artifact retention, and how to prevent false-green builds.",
+        theoryChecklist: [
+          "Linux Container Execution: Managing headless mode and OS dependencies (`playwright install --with-deps`).",
+          "Pipeline Flow Control: Using `if: always()` so reports generate and upload even when tests fail.",
+          "Preventing False Positives: Inspecting `reports/cucumber-report.json` to exit with status code 1 on test failures.",
+          "Full Artifact Archiving: Packaging the entire `reports/` folder structure into downloadable zip files."
+        ],
+        theoryLectureScript: "Let me warn you about the most common CI pipeline bug: 'The False-Green Build'. If a test fails, `npm test` emits an exit code of 1. If you don't handle that properly, your CI workflow stops immediately, skipping your report generator and artifact upload steps. So engineers often add `npm test || true`. But if you do that, the pipeline step turns green even when your tests failed! To solve this, we let the tests run, use `if: always()` to guarantee the report and artifacts upload, and then run a final verification step that reads `cucumber-report.json` and properly fails the build if any test broke.",
+        trainerTips: "Open a completed GitHub Actions build page. Show students where to locate the downloaded artifact, extract it, and open `index.html` to review test evidence.",
+        practicalSteps: [
+          {
+            title: "Step 1: Create .github/workflows/test-pipeline.yml",
+            desc: "Production-ready GitHub Actions configuration:",
+            voiceover: "Here is our workflow YAML. Notice the triggers: push, pull_request, and workflow_dispatch. workflow_dispatch allows you to trigger runs manually from the GitHub UI and select your target environment and browser from dropdown menus.",
+            code: "name: Playwright Cucumber E2E Pipeline\n\non:\n  push:\n    branches: [ main, master ]\n  pull_request:\n    branches: [ main, master ]\n  workflow_dispatch:\n\njobs:\n  test:\n    runs-on: ubuntu-latest\n    timeout-minutes: 30\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with: { node-version: 20, cache: 'npm' }\n      - run: npm ci\n      - run: npx playwright install --with-deps\n      - run: mkdir -p reports\n      - name: Run Tests\n        run: npm test || true\n        env: { HEADLESS: 'true', CI: 'true' }\n      - name: Generate Report\n        if: always()\n        run: node generate-report.cjs\n      - name: Upload Artifacts\n        uses: actions/upload-artifact@v4\n        if: always()\n        with:\n          name: full-execution-report\n          path: reports/\n          retention-days: 14"
+          },
+          {
+            title: "Step 2: Commit, Push & Verify in Cloud",
+            desc: "Push to GitHub and monitor the Actions tab:",
+            voiceover: "Let's push this up to GitHub. Open your browser, go to your repository's Actions tab, and watch the Ubuntu runner spin up, install Playwright's system libraries, execute the test suite, and publish your artifacts.",
+            code: "git add .\ngit commit -m \"feat: complete enterprise test automation framework\"\ngit push origin main"
+          }
+        ],
+        pitfall: {
+          title: "Debugging Drill: The False-Green Pipeline Trap",
+          desc: "Demonstrate how using `npm test || true` without a downstream verification script marks a failed test run as green in GitHub Actions, and show how evaluating `cucumber-report.json` properly fails the build.",
+          spokenWalkthrough: "Take a look at this pipeline run. A test failed, but GitHub says the job passed with a green checkmark! In an enterprise, code with broken tests would have been deployed directly to production. Now let's add our JSON verification step at the end. Rerun the workflow. Now GitHub correctly flags the build with a red 'X' while our report artifacts remain 100% available for download."
+        },
+        spokenClosing: "Congratulations! Over 7 intensive days, you have built an enterprise-grade, thread-safe, multi-environment BDD automation framework with automated reporting and cloud CI/CD integration. You are now equipped to design test architectures at the highest industry standard."
+      }
+    ];
+
+    let currentDayIndex = 0;
+    let timerSeconds = 0;
+    let timerInterval = null;
+
+    function toggleScriptMode(enableScript) {
+      showScript = enableScript;
+      document.getElementById('btnScriptMode').classList.toggle('active', enableScript);
+      document.getElementById('btnCodeMode').classList.toggle('active', !enableScript);
+      renderActiveDay();
+    }
+
+    function renderNav() {
+      const navList = document.getElementById('navList');
+      navList.innerHTML = '';
+      curriculumData.forEach((item, index) => {
+        const navEl = document.createElement('a');
+        navEl.className = `nav-item ${index === currentDayIndex ? 'active' : ''}`;
+        navEl.onclick = () => selectDay(index);
+        navEl.innerHTML = `
+          <div class="nav-item-day">
+            <span class="day-badge">D${item.day}</span>
+            <span>${item.title.split(':')[0]}</span>
+          </div>
+          <span class="time-badge">2h</span>
+        `;
+        navList.appendChild(navEl);
+      });
+    }
+
+    function renderActiveDay() {
+      const data = curriculumData[currentDayIndex];
+      document.getElementById('crumbDay').textContent = `Day ${data.day}`;
+
+      const container = document.getElementById('dayContentArea');
+      container.innerHTML = `
+        <div class="day-banner">
+          <div class="day-meta-tag">SESSION MODULE 0${data.day}</div>
+          <h2 class="day-title">${data.title}</h2>
+          <p class="day-objective">${data.objective}</p>
+
+          <div class="time-distribution">
+            <div class="dist-card">
+              <div class="dist-label">Concept & Architecture</div>
+              <div class="dist-val">${data.distribution.theory}</div>
+            </div>
+            <div class="dist-card">
+              <div class="dist-label">Live Implementation</div>
+              <div class="dist-val">${data.distribution.practice}</div>
+            </div>
+            <div class="dist-card">
+              <div class="dist-label">Debugging Drill</div>
+              <div class="dist-val">${data.distribution.drill}</div>
+            </div>
+            <div class="dist-card">
+              <div class="dist-label">Recap & Wrap-Up</div>
+              <div class="dist-val">${data.distribution.recap}</div>
+            </div>
+          </div>
+        </div>
+
+        ${showScript ? `
+        <!-- Spoken Opening Script -->
+        <div class="speech-box">
+          <div class="speech-title"><span>🎙️</span> Opening Hook & Intro (Say this out loud in Minute 0-5)</div>
+          <p class="speech-script">"${data.spokenOpening}"</p>
+          <div class="speech-action">💡 Action: Greet students, share screen, display today's architecture goal.</div>
+        </div>
+        ` : ''}
+
+        <!-- Theory Section -->
+        <div class="module-card">
+          <div class="module-header">
+            <h3><span>📖</span> Architectural Concepts & Theory</h3>
+            <span class="badge-pill badge-blue">Deliver First 45 Mins</span>
+          </div>
+          <div class="module-body">
+            ${showScript ? `
+            <div class="speech-box" style="margin-bottom: 20px;">
+              <div class="speech-title"><span>🎙️</span> Lecture Deep-Dive Script (Explain these principles)</div>
+              <p class="speech-script">"${data.theoryLectureScript}"</p>
+            </div>
+            ` : ''}
+
+            <ul class="checklist">
+              ${data.theoryChecklist.map(item => `
+                <li class="checklist-item">
+                  <div class="check-box" onclick="toggleCheck(this)"></div>
+                  <span>${item}</span>
+                </li>
+              `).join('')}
+            </ul>
+
+            <div class="trainer-tip">
+              <strong>Trainer Delivery Note:</strong> ${data.trainerTips}
+            </div>
+          </div>
+        </div>
+
+        <!-- Implementation Section -->
+        <div class="module-card">
+          <div class="module-header">
+            <h3><span>💻</span> Live Hands-On Implementation</h3>
+            <span class="badge-pill badge-green">50 Mins Live Coding</span>
+          </div>
+          <div class="module-body">
+            ${data.practicalSteps.map((step, idx) => `
+              <div style="${idx > 0 ? 'margin-top: 28px;' : ''}">
+                <div style="font-weight: 700; font-size: 14.5px; color: #fff;">${step.title}</div>
+                <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">${step.desc}</div>
+
+                ${showScript ? `
+                <div class="speech-box" style="margin-top: 10px; margin-bottom: 12px; padding: 12px 16px;">
+                  <div class="speech-title" style="font-size: 11px;"><span>🎙️</span> Live Coding Voiceover:</div>
+                  <p class="speech-script" style="font-size: 13px;">"${step.voiceover}"</p>
+                </div>
+                ` : ''}
+
+                <div class="code-container">
+                  <div class="code-header">
+                    <span>TERMINAL / CODE BUFFER</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+                  </div>
+                  <pre><code>${escapeHtml(step.code)}</code></pre>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Debugging Drill Section -->
+        <div class="module-card">
+          <div class="module-header">
+            <h3><span>⚠️</span> Debugging Drill & Student Pitfalls</h3>
+            <span class="badge-pill badge-rose">15 Mins Fault Injection</span>
+          </div>
+          <div class="module-body">
+            <div class="pitfall-box">
+              <div class="pitfall-title"><span>⚡</span> ${data.pitfall.title}</div>
+              <div class="pitfall-desc">${data.pitfall.desc}</div>
+
+              ${showScript ? `
+              <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(251, 113, 133, 0.2);">
+                <div style="font-size: 11px; font-weight: 700; color: var(--rose); text-transform: uppercase;">🎙️ Fault-Injection Walkthrough:</div>
+                <p style="font-size: 13px; font-style: italic; color: #fecdd3; margin-top: 4px;">"${data.pitfall.spokenWalkthrough}"</p>
+              </div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+
+        ${showScript ? `
+        <!-- Closing Wrap Up -->
+        <div class="speech-box" style="border-left-color: var(--emerald); background: rgba(52, 211, 153, 0.05);">
+          <div class="speech-title" style="color: var(--emerald);"><span>🎯</span> Wrap-Up & Next Session Hook (Last 10 Mins)</div>
+          <p class="speech-script">"${data.spokenClosing}"</p>
+          <div class="speech-action">💡 Action: Open floor for 2-3 questions, verify students commit their working code to Git.</div>
+        </div>
+        ` : ''}
+      `;
+
+      // Update Nav Buttons
+      document.getElementById('prevDayBtn').disabled = currentDayIndex === 0;
+      document.getElementById('nextDayBtn').disabled = currentDayIndex === curriculumData.length - 1;
+      document.getElementById('prevDayBtn').style.opacity = currentDayIndex === 0 ? '0.4' : '1';
+      document.getElementById('nextDayBtn').style.opacity = currentDayIndex === curriculumData.length - 1 ? '0.4' : '1';
+    }
+
+    function selectDay(index) {
+      currentDayIndex = index;
+      renderNav();
+      renderActiveDay();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleCheck(el) {
+      el.classList.toggle('checked');
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function copyCode(btn) {
+      const code = btn.closest('.code-container').querySelector('code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const toast = document.getElementById('toast');
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 2200);
+      });
+    }
+
+    // Session Timer
+    document.getElementById('startTimerBtn').onclick = function() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        this.textContent = 'Start';
+      } else {
+        this.textContent = 'Pause';
+        timerInterval = setInterval(() => {
+          timerSeconds++;
+          const hrs = String(Math.floor(timerSeconds / 3600)).padStart(2, '0');
+          const mins = String(Math.floor((timerSeconds % 3600) / 60)).padStart(2, '0');
+          const secs = String(timerSeconds % 60).padStart(2, '0');
+          document.getElementById('timer').textContent = `${hrs}:${mins}:${secs}`;
+        }, 1000);
+      }
+    };
+
+    document.getElementById('resetTimerBtn').onclick = function() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timerSeconds = 0;
+      document.getElementById('timer').textContent = '00:00:00';
+      document.getElementById('startTimerBtn').textContent = 'Start';
+    };
+
+    document.getElementById('prevDayBtn').onclick = () => {
+      if (currentDayIndex > 0) selectDay(currentDayIndex - 1);
+    };
+
+    document.getElementById('nextDayBtn').onclick = () => {
+      if (currentDayIndex < curriculumData.length - 1) selectDay(currentDayIndex + 1);
+    };
+
+    // Initial Load
+    renderNav();
+    renderActiveDay();
+  </script>
+</body>
+</html>

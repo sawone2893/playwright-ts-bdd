@@ -1,0 +1,25 @@
+{
+  "cucumber.features": [
+    "features/**/*.feature"
+  ],
+  "cucumber.glue": [
+    "src/steps/**/*.ts",
+    "src/support/**/*.ts"
+  ],
+  "cucumber.parameterTypes": [
+    {
+      "name": "string",
+      "regex": "\"(.*?)\""
+    },
+    {
+      "name": "int",
+      "regex": "(\\d+)"
+    }
+  ],
+  "files.associations": {
+    "*.feature": "cucumber"
+  },
+  "editor.quickSuggestions": {
+    "strings": true
+  }
+}

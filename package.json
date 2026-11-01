@@ -26,6 +26,7 @@
     "test:staging": "cross-env ENV=staging tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
     "test:local": "cross-env ENV=local tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
     "test:qa:parallel": "cross-env ENV=qa tsx node_modules/@cucumber/cucumber/bin/cucumber.js --parallel 4",
+    "test:feature": "npx cross-env tsx node_modules/@cucumber/cucumber/bin/cucumber.js features/iframe_demo.feature",
     "report": "node generate-report.cjs",
     "test:report": "npm run test:chrome || npm run report"
   },

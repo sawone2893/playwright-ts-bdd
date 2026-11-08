@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { PageHolder } from '../support/page-holder';
 import { BasePage } from './BasePage';
 
 export interface ShippingInfo {
@@ -15,8 +15,8 @@ export class CheckoutPage extends BasePage {
   private readonly finishButton = '#finish';
   private readonly confirmationHeader = '.complete-header';
 
-  constructor(page: Page) {
-    super(page);
+  constructor(holder: PageHolder) {
+    super(holder);
   }
 
   async fillShippingDetails(info: ShippingInfo): Promise<void> {

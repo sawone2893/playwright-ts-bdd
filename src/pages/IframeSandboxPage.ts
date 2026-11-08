@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { PageHolder } from '../support/page-holder';
 import { BasePage } from './BasePage';
 
 export class IframeSandboxPage extends BasePage {
@@ -10,8 +10,8 @@ export class IframeSandboxPage extends BasePage {
   private readonly nestedFrames = ['frame[name="frame-top"]', 'frame[name="frame-middle"]'];
   private readonly middleContent = '#content';
 
-  constructor(page: Page) {
-    super(page);
+  constructor(holder: PageHolder) {
+    super(holder);
   }
 
   async navigateToSingleIframe(): Promise<void> {

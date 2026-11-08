@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { PageHolder } from '../support/page-holder';
 import { BasePage } from './BasePage';
 import { config } from '../support/config';
 
@@ -9,8 +9,8 @@ export class LoginPage extends BasePage {
   private readonly dashboardHeader = '.title';
   private readonly errorMessage = '[data-test="error"]';
 
-  constructor(page: Page) {
-    super(page);
+  constructor(holder: PageHolder) {
+    super(holder);
   }
 
   async navigate(): Promise<void> {

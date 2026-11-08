@@ -1,12 +1,12 @@
-import { Page } from '@playwright/test';
+import { PageHolder } from '../support/page-holder';
 import { BasePage } from './BasePage';
 
 export class InventoryPage extends BasePage {
   private readonly cartIcon = '.shopping_cart_link';
   private readonly checkoutButton = '#checkout';
 
-  constructor(page: Page) {
-    super(page);
+  constructor(holder: PageHolder) {
+    super(holder);
   }
 
   async addProductToCart(productName: string): Promise<void> {

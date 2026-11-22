@@ -51,7 +51,8 @@ Before(async function (this: CustomWorld,scenario) {
   this.browser = browser;
   const contextOptions = BrowserFactory.getContextOptions();
   this.context = await browser.newContext(contextOptions);
-
+  
+// Start Playwright tracing for this scenario's context
   await this.context.tracing.start({
     screenshots: true,
     snapshots: true,

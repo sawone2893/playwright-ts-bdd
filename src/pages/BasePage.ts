@@ -5,7 +5,9 @@ import {
   BrowserContext,
   expect,
 } from "@playwright/test";
-import { PageHolder } from '../support/page-holder';
+import { PageHolder } from "../support/page-holder";
+import { UiAssertions } from "../assertions/UiAssertions";
+
 export interface ActionOptions {
   /**
    * Supports:
@@ -40,13 +42,15 @@ export abstract class BasePage {
    * Triggers an action that spawns a new window, waits for it,
    * updates the shared holder, and brings the new tab to the front.
    */
-  async openAndSwitchToNewWindow(triggerAction: () => Promise<void>): Promise<Page> {
+  async openAndSwitchToNewWindow(
+    triggerAction: () => Promise<void>,
+  ): Promise<Page> {
     const [newPage] = await Promise.all([
-      this.context.waitForEvent('page'),
+      this.context.waitForEvent("page"),
       triggerAction(),
     ]);
 
-    await newPage.waitForLoadState('domcontentloaded');
+    await newPage.waitForLoadState("domcontentloaded");
     this.holder.current = newPage;
     await newPage.bringToFront();
     return newPage;
@@ -55,7 +59,10 @@ export abstract class BasePage {
   /**
    * Helper to click an element and switch active focus to the newly opened tab.
    */
-  async clickAndSwitchToNewWindow(selector: string | Locator, options?: ActionOptions): Promise<Page> {
+  async clickAndSwitchToNewWindow(
+    selector: string | Locator,
+    options?: ActionOptions,
+  ): Promise<Page> {
     return await this.openAndSwitchToNewWindow(async () => {
       await this.click(selector, options);
     });
@@ -71,9 +78,10 @@ export abstract class BasePage {
       const title = await p.title();
       const url = p.url();
 
-      const isMatch = typeof identifier === 'string'
-        ? title.includes(identifier) || url.includes(identifier)
-        : identifier.test(title) || identifier.test(url);
+      const isMatch =
+        typeof identifier === "string"
+          ? title.includes(identifier) || url.includes(identifier)
+          : identifier.test(title) || identifier.test(url);
 
       if (isMatch) {
         this.holder.current = p;
@@ -91,7 +99,9 @@ export abstract class BasePage {
   async switchToWindowByIndex(index: number): Promise<void> {
     const pages = this.context.pages();
     if (!pages[index]) {
-      throw new Error(`Window at index ${index} does not exist. Total open windows: ${pages.length}`);
+      throw new Error(
+        `Window at index ${index} does not exist. Total open windows: ${pages.length}`,
+      );
     }
     this.holder.current = pages[index];
     await this.holder.current.bringToFront();
@@ -326,8 +336,7 @@ export abstract class BasePage {
     timeout = 5000,
     options?: ActionOptions,
   ): Promise<void> {
-    const element = this.getLocator(selector, options);
-    await expect(element).toBeVisible({ timeout });
+    await UiAssertions.toBeVisible(this.getLocator(selector, options), timeout);
   }
 
   async expectToBeHidden(
@@ -335,8 +344,7 @@ export abstract class BasePage {
     timeout = 5000,
     options?: ActionOptions,
   ): Promise<void> {
-    const element = this.getLocator(selector, options);
-    await expect(element).toBeHidden({ timeout });
+    await UiAssertions.toBeHidden(this.getLocator(selector, options), timeout);
   }
 
   async expectToHaveText(
@@ -345,8 +353,11 @@ export abstract class BasePage {
     timeout = 5000,
     options?: ActionOptions,
   ): Promise<void> {
-    const element = this.getLocator(selector, options);
-    await expect(element).toHaveText(expectedText, { timeout });
+    await UiAssertions.toHaveText(
+      this.getLocator(selector, options),
+      expectedText,
+      timeout,
+    );
   }
 
   async expectToContainText(
@@ -355,8 +366,11 @@ export abstract class BasePage {
     timeout = 5000,
     options?: ActionOptions,
   ): Promise<void> {
-    const element = this.getLocator(selector, options);
-    await expect(element).toContainText(expectedSubstring, { timeout });
+    await UiAssertions.toContainText(
+      this.getLocator(selector, options),
+      expectedSubstring,
+      timeout,
+    );
   }
 
   // --- Explicit Wait Utils ---

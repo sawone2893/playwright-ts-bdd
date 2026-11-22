@@ -1,6 +1,7 @@
 // src/api/core/BaseApiClient.ts
 import { APIRequestContext, APIResponse, expect } from '@playwright/test';
 import { config } from '../../support/config';
+import { ApiAssertions } from '../../assertions/ApiAssertions';
 
 export interface ApiRequestOptions {
   headers?: Record<string, string>;
@@ -60,14 +61,7 @@ export abstract class BaseApiClient {
   // --- Centralized Assertions & Parsers ---
 
   async expectStatus(response: APIResponse, expectedStatus: number): Promise<void> {
-    const actualStatus = response.status();
-    if (actualStatus !== expectedStatus) {
-      const bodyText = await response.text();
-      expect(
-        actualStatus,
-        `Expected status ${expectedStatus}, got ${actualStatus}. Response: ${bodyText}`
-      ).toBe(expectedStatus);
-    }
+    await ApiAssertions.toHaveStatus(response, expectedStatus);
   }
 
   async parseJson<T>(response: APIResponse): Promise<T> {

@@ -28,7 +28,7 @@
     "test:staging": "cross-env ENV=staging tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
     "test:local": "cross-env ENV=local tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
     "test:qa:parallel": "cross-env ENV=qa tsx node_modules/@cucumber/cucumber/bin/cucumber.js --parallel 4",
-    "test:feature": "npx cross-env tsx node_modules/@cucumber/cucumber/bin/cucumber.js features/api_demo.feature",
+    "test:uifeature": "npx cross-env tsx node_modules/@cucumber/cucumber/bin/cucumber.js features/iframe_demo.feature",
     "test:apifeature": "npx cross-env tsx node_modules/@cucumber/cucumber/bin/cucumber.js features/api/user_api.feature",
     "test-trace": "npx playwright show-trace reports/traces/Complete_end_to_end_checkout_with_multiple_items.zip",
     "report": "node generate-report.cjs",

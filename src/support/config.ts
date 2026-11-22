@@ -29,6 +29,8 @@ if (fs.existsSync(targetEnvPath)) {
 export interface AppConfig {
   env: Environment;
   baseUrl: string;
+  apiBaseUrl: string;
+  apiTimeout: number;
   browser: BrowserType;
   headless: boolean;
   device?: string;
@@ -52,6 +54,8 @@ const toNumber = (val: string | undefined, fallback: number): number => {
 export const config: AppConfig = {
   env: activeEnv,
   baseUrl: process.env.BASE_URL || 'https://www.saucedemo.com',
+  apiBaseUrl: process.env.API_BASE_URL || 'https://jsonplaceholder.typicode.com',
+  apiTimeout: toNumber(process.env.API_TIMEOUT, 15000),
   browser: (process.env.BROWSER as BrowserType) || 'chromium',
   headless: toBoolean(process.env.HEADLESS, true),
   device: process.env.DEVICE,

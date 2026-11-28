@@ -1,91 +1,201 @@
-# Playwright TypeScript BDD Framework
+# Playwright TypeScript Cucumber Framework
 
-An end-to-end browser automation framework built with Playwright, TypeScript, and Cucumber. The current examples cover SauceDemo authentication and the product checkout flow.
+An end-to-end automation framework using Playwright, TypeScript, and Cucumber. The examples cover SauceDemo login and checkout, a JSONPlaceholder user API, and browser iframe/window handling on external demo sites.
 
-## Framework standards
+## What is implemented
 
-### BDD features
-
-- Store executable specifications as `.feature` files under `features/`.
-- Write scenarios in Gherkin with a clear `Feature`, optional shared `Background`, and descriptive scenario names.
-- Use `Scenario Outline` and an `Examples` table for related input variations; use Cucumber data tables for structured multi-value inputs.
-- Tag features and scenarios to describe their purpose and to support selective execution. Existing tags include `@smoke`, `@negative`, `@positive`, `@regression`, `@ui`, `@visual`, `@checkout`, and `@e2e`.
-- Keep feature steps focused on user behavior. Implement their automation in the matching TypeScript step-definition files under `src/steps/`.
-
-### Step definitions and scenario state
-
-- Register Cucumber `Given`, `When`, and `Then` steps in `src/steps/`, grouped by feature area.
-- Use `async` steps and await browser actions and assertions.
-- Access scenario state through the Cucumber `CustomWorld`. A `PageManager` is created for each scenario and provides the page objects used by its steps.
-- Convert Cucumber tables into typed data before passing them to page-object methods when the data has a defined shape.
-
-### Page objects and browser interactions
-
-- Keep selectors and user-facing page operations in page objects under `src/pages/`; do not put page selectors or low-level browser interactions in feature files.
-- Extend `BasePage` for shared navigation, locator resolution, common interactions, waits, and Playwright assertions.
-- Use `PageManager` to expose page objects. Its page-object getters initialize their objects lazily using the current scenario's Playwright `Page`.
-- Prefer the shared `BasePage` operations for interactions and assertions. They wait for visibility before common actions and use Playwright's assertion and waiting APIs.
-- TypeScript is configured with `strict` mode. Keep page and data contracts explicitly typed.
-
-### Configuration and environments
-
-- `src/support/config.ts` centralizes environment, base URL, browser, headless mode, device, worker-count and retry-count values, timeout, and slow motion.
-- Select an environment once with the runner's `ENV` variable; supported names are `dev`, `qa`, `staging`, `prod`, and `local`, with `qa` as the default. Do not add `ENV` to `env/.env` or `env/.env.<environment>`; it selects which environment file to load and is read only from the process environment.
-- Environment files are loaded from `env/` with this precedence for application settings: process environment, `env/.env.<environment>`, `env/.env`, then code defaults.
-- Keep environment-specific values in local `env/.env*` files and do not commit secrets. These files are excluded by `.gitignore`.
-- `src/support/config.ts` reads `ENV` from the process to select the environment, and reads application settings from `BASE_URL`, `API_BASE_URL`, `API_TIMEOUT`, `BROWSER`, `HEADLESS`, `DEVICE`, `PARALLEL`, `RETRY`, `TIMEOUT`, and `SLOW_MO`. Defaults include SauceDemo as the base URL, Chromium, headless mode, four parallel workers, two retries, a 60-second Cucumber timeout, and no slow motion. Invalid environment/browser names, boolean values, and numeric ranges fail during configuration loading. `cucumber.mjs` reads the worker and retry counts from `config.ts`; npm scripts do not override them.
-- Supported browser names are `chromium`, `firefox`, and `webkit`. `DEVICE` can select a Playwright device profile; without one, the context uses a 1920 × 1080 viewport.
-
-### Test lifecycle and artifacts
-
-- Cucumber hooks in `src/support/hooks.ts` launch one browser for the test run, create a fresh browser context and page for each scenario, and close the page/context after each scenario.
-- Browser contexts record video under `reports/videos/`. On failure, the framework captures a full-page screenshot and retains/attaches the scenario video. Videos from passing scenarios are discarded.
-- Cucumber is configured to discover `features/**/*.feature`, import TypeScript steps and support code, and write summary, HTML, and JSON output under `reports/`.
-- `cucumber.mjs` configures the Cucumber imports, formatters, and retry tag filter (`@flaky or not @smoke`); worker and retry counts come from `src/support/config.ts`.
-- `npm run report` generates the expanded HTML report at `reports/html-report/index.html` from `reports/cucumber-report.json`; run tests first to create the JSON input.
-
-## Project layout
-
-| Path | Purpose |
+| Area | Current examples |
 | --- | --- |
-| `features/` | Gherkin feature files |
-| `src/steps/` | Cucumber step definitions |
-| `src/pages/` | Page objects, shared page operations, and `PageManager` |
-| `src/support/` | Browser factory, configuration, custom World, and Cucumber hooks |
-| `env/` | Local environment configuration files |
-| `reports/` | Generated Cucumber reports and test artifacts |
-| `cucumber.mjs` | Cucumber feature discovery, imports, formatters, and retry filter |
-| `tsconfig.json` | TypeScript compiler configuration |
+| UI authentication | Valid login, invalid/missing credentials, and login-form visibility |
+| UI checkout | Add products to cart, provide shipping details, verify the order, and confirm checkout |
+| API | Read a JSONPlaceholder user and submit a user-creation request |
+| Browser capabilities | Edit a single iframe, inspect nested frames, and switch between a parent tab and popup |
+
+The UI examples use SauceDemo. The API example uses JSONPlaceholder, and the iframe/window examples use `the-internet.herokuapp.com`. These are public demo services; a run needs network access and their availability is outside this repository's control. The `@visual` tag currently marks a login-form visibility scenario; it does not perform screenshot-based visual comparison.
+
+## Architecture and conventions
+
+### Gherkin and step definitions
+
+- Feature specifications live under `features/`; their step implementations are grouped by area under `src/steps/`.
+- Scenarios use behavior-focused Given/When/Then steps. The login feature uses a Scenario Outline for credential variations, and checkout uses data tables for products, shipping information, and expected order items.
+- Current tags are `@api`, `@auth`, `@checkout`, `@e2e`, `@iframe`, `@negative`, `@positive`, `@regression`, `@smoke`, `@ui`, `@visual`, and `@windows`.
+- The Cucumber retry filter is `@flaky or not @smoke`: eligible non-smoke scenarios can be retried, as can scenarios tagged `@flaky`. No current feature is tagged `@flaky`.
+
+### Scenario state and lifecycle
+
+- `CustomWorld` holds scenario-scoped browser, context, page, page manager, API context, API manager, and last API response references.
+- Cucumber hooks launch a browser once per Cucumber worker, including for API-only runs. Each scenario gets a fresh API request context; scenarios tagged `@api` skip browser-context and page creation. Other scenarios get a fresh browser context and page.
+- Each UI context starts Playwright tracing. On failure, the hooks save a trace and screenshot, retain and attach the video, and attach the last API response body when available. Passing-scenario videos are deleted. Contexts and pages are closed after each scenario.
+- Cucumber's default step timeout comes from `TIMEOUT` (60,000 ms fallback). The shared UI assertion helpers use a 5,000 ms fallback; API requests use `API_TIMEOUT` (15,000 ms fallback).
+
+### UI page layer
+
+- `BasePage` centralizes navigation, common locator actions, state assertions, frame resolution, and window/tab operations. Actions can target a page or a single/nested frame.
+- Concrete page objects keep page-specific selectors and workflows. `PageManager` creates those objects lazily and shares a mutable `PageHolder`; updating the holder when switching tabs makes existing page objects use the active tab.
+- `UiAssertions` wraps Playwright assertions for elements and pages. Prefer these helpers or Playwright's built-in locator assertions over fixed sleeps.
+
+### API layer
+
+- A Playwright `APIRequestContext` is created for each scenario and configured with `API_BASE_URL`.
+- `BaseApiClient` provides GET, POST, PUT, PATCH, and DELETE requests, per-request timeout overrides, request timing/status logs, and shared status/JSON helpers.
+- `UserService` currently exposes `GET /users/:id`, `POST /users`, and `DELETE /users/:id`. The feature examples exercise GET and POST only.
+- `ApiAssertions` provides status, success, header, JSON-property, and array-size assertions. Request and response types are in `src/api/models/user.model.ts`.
+
+## Configuration
+
+`ENV` is selected once in the runner's process environment, not in an env file. Supported values are `dev`, `qa`, `staging`, `prod`, and `local`; it defaults to `qa`. The runner selects `env/.env.<ENV>`. The optional shared `env/.env` file is loaded first, then the selected environment file; process values override both. Code defaults are used for settings not supplied by either source.
+
+The currently checked-in `env/.env.*` files are tracked by Git. The `.gitignore` pattern does not untrack files that are already tracked. Keep credentials and other secrets out of them; use CI secrets or process environment variables for sensitive values.
+
+| Setting | Meaning | Code fallback / validation |
+| --- | --- | --- |
+| `ENV` | Selects the environment file; read from the process only | `qa`; one of `dev`, `qa`, `staging`, `prod`, `local` |
+| `BASE_URL` | UI application base URL | `https://www.saucedemo.com` |
+| `API_BASE_URL` | API request base URL | `https://jsonplaceholder.typicode.com` |
+| `API_TIMEOUT` | API request timeout in milliseconds | `15000`; positive integer |
+| `BROWSER` | Browser engine | `chromium`; one of `chromium`, `firefox`, `webkit` |
+| `HEADLESS` | Headless browser mode | `true`; must be `true` or `false` |
+| `DEVICE` | Playwright device profile | Unset; scripts provide `iPhone 15 Pro` or `Pixel 7` for mobile runs |
+| `PARALLEL` | Cucumber worker count | `4`; integer of at least 1 |
+| `RETRY` | Maximum Cucumber retries | `2`; integer of at least 0 |
+| `TIMEOUT` | Cucumber step timeout in milliseconds | `60000`; positive integer |
+| `SLOW_MO` | Browser action delay in milliseconds | `0`; non-negative number |
+
+Invalid environment/browser names, boolean values, and numeric values fail during configuration loading. An unrecognized `DEVICE` currently falls back to the desktop context rather than failing validation.
+
+`cucumber.mjs` imports `config.ts` for the default worker and retry counts, while retaining Cucumber-specific imports, formatters, and retry filter. The `single` Cucumber profile is a debug-only override (one worker, zero retries, summary output) used by the VS Code launch configurations.
 
 ## Getting started
 
-Requirements: Node.js and npm. Install dependencies and run the default Cucumber suite:
+Requirements: Node.js 24 (the version used in CI) and npm.
 
 ```sh
-npm install
+npm ci
+npx playwright install
 npm test
 ```
 
-Playwright browsers must be installed in the local environment for the selected browser. The framework's browser launch is provided by `@playwright/test`.
+`npx playwright install` installs the supported browser engines. On Linux CI, the workflow uses `npx playwright install --with-deps`.
+
+Run the TypeScript check separately with:
+
+```sh
+npm exec -- tsc --noEmit
+```
 
 ## Common commands
 
 | Command | Purpose |
 | --- | --- |
-| `npm test` | Run the Cucumber suite with the configured defaults |
-| `npm run test:chrome:parallel` | Run Chromium scenarios using the configured worker count |
-| `npm run test:firefox:parallel` | Run Firefox scenarios using the configured worker count |
-| `npm run test:webkit:parallel` | Run WebKit scenarios using the configured worker count |
-| `npm run test:mobile:ios:parallel` | Run WebKit with the configured iPhone 15 Pro device profile |
-| `npm run test:mobile:android:parallel` | Run Chromium with the configured Pixel 7 device profile |
-| `npm run test:headed` | Run with the browser visible |
+| `npm test` | Run the default Cucumber suite; its `pretest` hook first removes screenshots, videos, and traces |
+| `npm run test:chrome:parallel` | Run Chromium scenarios using the configured worker/retry settings |
+| `npm run test:firefox:parallel` | Run Firefox scenarios using the configured worker/retry settings |
+| `npm run test:webkit:parallel` | Run WebKit scenarios using the configured worker/retry settings |
+| `npm run test:mobile:ios:parallel` | Run WebKit using the `iPhone 15 Pro` profile |
+| `npm run test:mobile:android:parallel` | Run Chromium using the `Pixel 7` profile |
+| `npm run test:chrome:headed` | Run the full suite in headed Chromium |
+| `npm run test:firefox:headed` | Run the full suite in headed Firefox |
+| `npm run test:webkit:headed` | Run the full suite in headed WebKit |
 | `npm run test:chrome:smoke` | Run scenarios tagged `@smoke` in Chromium |
-| `npm run test:chrome:negative` | Run scenarios tagged `@negative` in Chromium using the configured worker count |
+| `npm run test:chrome:negative` | Run scenarios tagged `@negative` in Chromium |
 | `npm run test:chrome:checkout` | Run scenarios tagged `@checkout` in Chromium |
+| `npm run test:chrome:checkout:headed` | Run checkout scenarios in headed Chromium |
 | `npm run test:dev` | Run using the `dev` environment |
 | `npm run test:qa` | Run using the `qa` environment |
 | `npm run test:staging` | Run using the `staging` environment |
 | `npm run test:local` | Run using the `local` environment |
-| `npm run report` | Generate the expanded HTML report from the latest Cucumber JSON report |
+| `npm run test:uifeature` | Run `features/iframe_demo.feature` only |
+| `npm run test:apifeature` | Run `features/api/user_api.feature` only |
+| `npm run report` | Generate `reports/html-report/index.html` from the latest Cucumber JSON report |
+| `npm run test:report` | Run configured Chromium tests, then generate the expanded report if tests pass |
+| `npm run test-trace` | Open the named checkout trace at `reports/traces/Complete_end_to_end_checkout_with_multiple_items.zip` |
+| `npm run clean` | Delete screenshot, video, and trace artifact directories |
 
-Other browser, headed, environment, and tag combinations can be selected with the corresponding npm script or environment variables.
+Other browser, environment, and tag combinations can be selected with process environment variables or Cucumber CLI options. Only `npm test` automatically runs the `pretest` cleanup script; the other test scripts do not.
+
+## Reports and CI
+
+Cucumber writes:
+
+- `reports/cucumber-report.html` — Cucumber HTML output
+- `reports/cucumber-report.json` — JSON input for the expanded report
+- `reports/screenshots/` — failure screenshots
+- `reports/traces/` — failure traces
+- `reports/videos/` — failed-scenario videos retained after cleanup
+- `reports/html-report/index.html` — expanded report generated by `npm run report`
+
+The GitHub Actions workflow in `.github/workflows/e2e-pipeline.yml` runs for pushes and pull requests targeting `main` or `master`, and can be started manually. Manual runs allow `dev`, `qa`, or `staging` and Chromium, Firefox, or WebKit. It installs dependencies and browsers, runs the suite, attempts report generation and artifact upload even after test failure, then enforces the original test result. The uploaded `reports/` artifact is retained for 14 days.
+
+## Repository file map
+
+### Project and tooling files
+
+| File | Purpose |
+| --- | --- |
+| `README.md` | Framework overview, configuration, commands, and file map |
+| `package.json` | Dependencies and npm commands |
+| `package-lock.json` | Locked dependency tree used by `npm ci` |
+| `cucumber.mjs` | Cucumber profiles, step/support imports, formatters, and retry filter |
+| `tsconfig.json` | Strict TypeScript compiler settings and included source paths |
+| `.gitignore` | Ignores dependencies, build output, reports, and matching env paths |
+| `generate-report.cjs` | Builds the expanded Cucumber HTML report |
+| `.github/workflows/e2e-pipeline.yml` | GitHub Actions test, report, and artifact workflow |
+| `.vscode/launch.json` | Debug current feature or current scenario line using the `single` profile |
+| `.vscode/settings.json` | Cucumber extension feature/glue patterns and editor parameter types |
+| `LICENSE` | Apache License 2.0 text; note `package.json` currently declares `ISC`, so reconcile the metadata before distribution |
+| `BDD Framework Masterclass.html` | Standalone BDD masterclass/instructor guide |
+| `playwright_cucumber_framework_dashboard.html` | Standalone framework dashboard/reference page |
+| `playwright_cucumber_framework_comprehensive_hub.html` | Standalone comprehensive framework hub/reference page |
+
+### Environment files
+
+| File | Purpose |
+| --- | --- |
+| `env/.env.dev` | Development settings |
+| `env/.env.qa` | QA settings |
+| `env/.env.staging` | Staging settings |
+| `env/.env.prod` | Production settings |
+| `env/.env.local` | Local settings |
+
+These files contain application settings only; do not put the `ENV` selector in them. The optional shared `env/.env` file is not currently tracked.
+
+### Feature specifications
+
+| File | Coverage | Step definitions |
+| --- | --- | --- |
+| `features/login.feature` | Login success, negative credential cases, and form visibility | `src/steps/login.steps.ts` |
+| `features/checkout.feature` | Multi-item purchase and checkout confirmation | `src/steps/checkout.steps.ts` |
+| `features/api/user_api.feature` | User lookup and user creation | `src/steps/api/user_api.steps.ts` |
+| `features/iframe_demo.feature` | Single and nested iframe behavior | `src/steps/iframe_demo.steps.ts` |
+| `features/windows_demo.feature` | Parent and popup tab handling | `src/steps/windows_demo.steps.ts` |
+
+### TypeScript implementation
+
+| File | Responsibility |
+| --- | --- |
+| `src/support/config.ts` | Environment selection, env-file precedence, validation, and typed runtime settings |
+| `src/support/browser-factory.ts` | Browser launch, device context options, viewport, and video recording |
+| `src/support/custom-world.ts` | Cucumber World state for UI and API scenarios |
+| `src/support/hooks.ts` | Browser/API setup and teardown, tracing, failure artifacts, and Cucumber timeout |
+| `src/support/page-holder.ts` | Mutable active-page reference shared by page objects |
+| `src/base/BasePage.ts` | Shared Playwright navigation, frame/window, action, wait, and assertion operations |
+| `src/pageObjectFactory/PageManager.ts` | Lazy access to the page objects |
+| `src/pages/LoginPage.ts` | Login navigation, login action, and login assertions |
+| `src/pages/InventoryPage.ts` | Product selection, cart navigation, and checkout entry |
+| `src/pages/CheckoutPage.ts` | Shipping details, order overview, and confirmation |
+| `src/pages/IframeSandboxPage.ts` | Single/nested iframe demo interactions |
+| `src/pages/WindowsDemoPage.ts` | Popup window demo interactions |
+| `src/assertions/UiAssertions.ts` | Shared locator and page-level Playwright assertions |
+| `src/assertions/ApiAssertions.ts` | Shared HTTP status, header, JSON property, and array assertions |
+| `src/api/ApiManager.ts` | Lazy API service access |
+| `src/api/core/BaseApiClient.ts` | Shared API request methods, timeout handling, logging, and helpers |
+| `src/api/models/user.model.ts` | User request and response TypeScript interfaces |
+| `src/api/services/UserService.ts` | User API endpoints |
+| `src/steps/login.steps.ts` | Login Gherkin step bindings |
+| `src/steps/checkout.steps.ts` | Checkout Gherkin step bindings |
+| `src/steps/api/user_api.steps.ts` | API Gherkin step bindings |
+| `src/steps/iframe_demo.steps.ts` | Iframe Gherkin step bindings |
+| `src/steps/windows_demo.steps.ts` | Window/tab Gherkin step bindings |
+
+`reports/` is generated at runtime and ignored by Git. `node_modules/` is installed from the package manifests and is not part of the framework source. No separate lint or unit-test command is currently defined in `package.json`.

@@ -1,13 +1,21 @@
-import { Locator, Page, expect } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 export class UiAssertions {
   private static readonly defaultTimeout = 5000;
 
-  static async toBeVisible(locator: Locator, timeout = this.defaultTimeout, message?: string): Promise<void> {
+  static async toBeVisible(
+    locator: Locator,
+    timeout = this.defaultTimeout,
+    message?: string,
+  ): Promise<void> {
     await expect(locator, message).toBeVisible({ timeout });
   }
 
-  static async toBeHidden(locator: Locator, timeout = this.defaultTimeout, message?: string): Promise<void> {
+  static async toBeHidden(
+    locator: Locator,
+    timeout = this.defaultTimeout,
+    message?: string,
+  ): Promise<void> {
     await expect(locator, message).toBeHidden({ timeout });
   }
 
@@ -15,7 +23,7 @@ export class UiAssertions {
     locator: Locator,
     expectedText: string | RegExp,
     timeout = this.defaultTimeout,
-    message?: string
+    message?: string,
   ): Promise<void> {
     await expect(locator, message).toHaveText(expectedText, { timeout });
   }
@@ -24,7 +32,7 @@ export class UiAssertions {
     locator: Locator,
     expectedSubstring: string | RegExp,
     timeout = this.defaultTimeout,
-    message?: string
+    message?: string,
   ): Promise<void> {
     await expect(locator, message).toContainText(expectedSubstring, { timeout });
   }
@@ -33,16 +41,24 @@ export class UiAssertions {
     locator: Locator,
     expectedValue: string | RegExp,
     timeout = this.defaultTimeout,
-    message?: string
+    message?: string,
   ): Promise<void> {
     await expect(locator, message).toHaveValue(expectedValue, { timeout });
   }
 
-  static async toBeEnabled(locator: Locator, timeout = this.defaultTimeout, message?: string): Promise<void> {
+  static async toBeEnabled(
+    locator: Locator,
+    timeout = this.defaultTimeout,
+    message?: string,
+  ): Promise<void> {
     await expect(locator, message).toBeEnabled({ timeout });
   }
 
-  static async toBeDisabled(locator: Locator, timeout = this.defaultTimeout, message?: string): Promise<void> {
+  static async toBeDisabled(
+    locator: Locator,
+    timeout = this.defaultTimeout,
+    message?: string,
+  ): Promise<void> {
     await expect(locator, message).toBeDisabled({ timeout });
   }
 
@@ -51,7 +67,7 @@ export class UiAssertions {
     name: string,
     value: string | RegExp,
     timeout = this.defaultTimeout,
-    message?: string
+    message?: string,
   ): Promise<void> {
     await expect(locator, message).toHaveAttribute(name, value, { timeout });
   }
@@ -60,7 +76,7 @@ export class UiAssertions {
     locator: Locator,
     count: number,
     timeout = this.defaultTimeout,
-    message?: string
+    message?: string,
   ): Promise<void> {
     await expect(locator, message).toHaveCount(count, { timeout });
   }
@@ -71,7 +87,7 @@ export class UiAssertions {
     page: Page,
     expectedUrl: string | RegExp,
     timeout = this.defaultTimeout,
-    message?: string
+    message?: string,
   ): Promise<void> {
     await expect(page, message).toHaveURL(expectedUrl, { timeout });
   }
@@ -80,7 +96,7 @@ export class UiAssertions {
     page: Page,
     expectedTitle: string | RegExp,
     timeout = this.defaultTimeout,
-    message?: string
+    message?: string,
   ): Promise<void> {
     await expect(page, message).toHaveTitle(expectedTitle, { timeout });
   }

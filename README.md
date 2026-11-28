@@ -91,7 +91,11 @@ npm exec -- tsc --noEmit
 | Command | Purpose |
 | --- | --- |
 | `npm test` | Run the default Cucumber suite; its `pretest` hook first removes screenshots, videos, and traces |
-| `npm run test:unit` | Run unit tests, including browser launch options, scenario resources, artifact names, and retry metrics |
+| `npm run lint` | Run Biome lint checks across source, tests, and scripts |
+| `npm run format:check` | Verify code and project configuration formatting |
+| `npm run format` | Apply the configured formatter to code and project configuration |
+| `npm exec -- tsc --noEmit` | Type-check the project without emitting build output |
+| `npm run test:unit` | Run focused unit tests, including configuration validation and teardown behavior |
 | `npm run report:retries` | Report the retry rate for the `CUCUMBER_RUN_ID` run; exits unsuccessfully if any retry occurred |
 | `npm run test:chrome:parallel` | Run Chromium scenarios using the configured worker/retry settings |
 | `npm run test:firefox:parallel` | Run Firefox scenarios using the configured worker/retry settings |
@@ -140,6 +144,7 @@ The GitHub Actions workflow in `.github/workflows/e2e-pipeline.yml` runs for pus
 | `README.md` | Framework overview, configuration, commands, and file map |
 | `package.json` | Dependencies and npm commands |
 | `package-lock.json` | Locked dependency tree used by `npm ci` |
+| `biome.json` | Biome lint and formatting rules |
 | `cucumber.mjs` | Cucumber profiles, step/support imports, formatters, and retry filter |
 | `scripts/report-retries.ts` | Reports retry counts/rate and fails when scenarios required retries |
 | `tsconfig.json` | Strict TypeScript compiler settings and included source paths |
@@ -186,6 +191,7 @@ These files contain application settings only; do not put the `ENV` selector in 
 | `src/support/artifact-naming.ts` | Creates feature-, scenario-, and attempt-specific artifact names |
 | `src/support/retry-metrics.ts` | Records retry-triggering failures and calculates retry rate |
 | `src/support/scenario-resources.ts` | Resolves API and browser requirements from scenario tags |
+| `src/support/teardown-actions.ts` | Runs teardown operations independently and collects failures |
 | `src/support/page-holder.ts` | Mutable active-page reference shared by page objects |
 | `src/base/BasePage.ts` | Shared Playwright navigation, frame/window, action, wait, and assertion operations |
 | `src/pageObjectFactory/PageManager.ts` | Lazy access to the page objects |
@@ -214,5 +220,7 @@ These files contain application settings only; do not put the `ENV` selector in 
 | `tests/scenario-resources.test.ts` | Verifies UI, hybrid API/UI, and API-only resource selection |
 | `tests/artifact-naming.test.ts` | Verifies artifact names distinguish features and scenario attempts |
 | `tests/retry-metrics.test.ts` | Verifies retry-rate and retry-attempt calculations |
+| `tests/config-validation.test.ts` | Verifies invalid browser, boolean, and timeout settings fail at load time |
+| `tests/teardown-actions.test.ts` | Verifies teardown continues closing resources after an artifact failure |
 
-`reports/` is generated at runtime and ignored by Git. `node_modules/` is installed from the package manifests and is not part of the framework source. Unit tests run with `npm run test:unit`; no separate lint command is currently defined.
+`reports/` is generated at runtime and ignored by Git. `node_modules/` is installed from the package manifests and is not part of the framework source. Run `npm run lint`, `npm run format:check`, and `npm run test:unit` before submitting changes.

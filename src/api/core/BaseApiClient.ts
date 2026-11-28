@@ -1,7 +1,7 @@
 // src/api/core/BaseApiClient.ts
-import { APIRequestContext, APIResponse, expect } from '@playwright/test';
-import { config } from '../../support/config';
+import type { APIRequestContext, APIResponse } from '@playwright/test';
 import { ApiAssertions } from '../../assertions/ApiAssertions';
+import { config } from '../../support/config';
 
 export interface ApiRequestOptions {
   headers?: Record<string, string>;
@@ -20,7 +20,7 @@ export abstract class BaseApiClient {
   protected async sendRequest(
     method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
     endpoint: string,
-    options?: ApiRequestOptions
+    options?: ApiRequestOptions,
   ): Promise<APIResponse> {
     const startTime = Date.now();
 

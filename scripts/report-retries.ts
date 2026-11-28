@@ -1,34 +1,28 @@
-import * as fs from "node:fs";
-import * as path from "node:path";
-import {
-  getRetryMetricsPath,
-  summarizeRetries,
-} from "../src/support/retry-metrics";
-import type { RetryRecord } from "../src/support/retry-metrics";
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import type { RetryRecord } from '../src/support/retry-metrics';
+import { getRetryMetricsPath, summarizeRetries } from '../src/support/retry-metrics';
 
-const reportPath = path.resolve("reports/cucumber-report.json");
+const reportPath = path.resolve('reports/cucumber-report.json');
 const runId = process.env.CUCUMBER_RUN_ID;
 
 if (!runId) {
-  throw new Error("CUCUMBER_RUN_ID must match the Cucumber test run.");
+  throw new Error('CUCUMBER_RUN_ID must match the Cucumber test run.');
 }
 
 if (!fs.existsSync(reportPath)) {
   throw new Error(`Cucumber JSON report was not found: ${reportPath}`);
 }
 
-const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
 const scenarios = report
-  .flatMap(
-    (feature: { elements?: Array<{ type?: string }> }) =>
-      feature.elements ?? [],
-  )
-  .filter((element: { type?: string }) => element.type === "scenario");
+  .flatMap((feature: { elements?: Array<{ type?: string }> }) => feature.elements ?? [])
+  .filter((element: { type?: string }) => element.type === 'scenario');
 
 const retryMetricsPath = getRetryMetricsPath(runId);
 const retryRecords: RetryRecord[] = fs.existsSync(retryMetricsPath)
   ? fs
-      .readFileSync(retryMetricsPath, "utf8")
+      .readFileSync(retryMetricsPath, 'utf8')
       .split(/\r?\n/)
       .filter(Boolean)
       .map((line) => JSON.parse(line) as RetryRecord)
@@ -45,8 +39,6 @@ for (const record of retryRecords) {
 }
 
 if (summary.retryAttemptCount > 0) {
-  console.error(
-    "This run is not a clean pass because at least one scenario required a retry.",
-  );
+  console.error('This run is not a clean pass because at least one scenario required a retry.');
   process.exitCode = 1;
 }

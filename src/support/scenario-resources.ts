@@ -4,10 +4,10 @@ export interface ScenarioResources {
 }
 
 export function getScenarioResources(tags: readonly string[]): ScenarioResources {
-  const apiOnly = tags.includes("@api-only");
+  const apiOnly = tags.includes('@api-only');
 
   return {
-    api: apiOnly || tags.includes("@api"),
+    api: apiOnly || tags.includes('@api'),
     browser: !apiOnly,
   };
 }

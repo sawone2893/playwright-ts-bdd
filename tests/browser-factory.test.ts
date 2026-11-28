@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { mock, test } from 'node:test';
-import { chromium, firefox, webkit, type LaunchOptions } from '@playwright/test';
+import { chromium, firefox, type LaunchOptions, webkit } from '@playwright/test';
 import { BrowserFactory } from '../src/support/browser-factory';
-import { config, type BrowserType } from '../src/support/config';
+import { type BrowserType, config } from '../src/support/config';
 
 const launchers = { chromium, firefox, webkit };
 const chromiumArgs = ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'];
@@ -10,16 +10,17 @@ const chromiumArgs = ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev
 for (const browserName of Object.keys(launchers) as BrowserType[]) {
   test(`${browserName} receives the appropriate launch options`, async () => {
     let receivedOptions: unknown;
-    const launchMock = mock.method(launchers[browserName], 'launch', async (options: LaunchOptions | undefined) => {
-      receivedOptions = options;
-      throw new Error('Intercepted browser launch');
-    });
+    const launchMock = mock.method(
+      launchers[browserName],
+      'launch',
+      async (options: LaunchOptions | undefined) => {
+        receivedOptions = options;
+        throw new Error('Intercepted browser launch');
+      },
+    );
 
     try {
-      await assert.rejects(
-        BrowserFactory.getBrowser(browserName),
-        /Intercepted browser launch/,
-      );
+      await assert.rejects(BrowserFactory.getBrowser(browserName), /Intercepted browser launch/);
     } finally {
       launchMock.mock.restore();
     }

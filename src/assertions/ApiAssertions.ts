@@ -1,4 +1,4 @@
-import { APIResponse, expect } from '@playwright/test';
+import { type APIResponse, expect } from '@playwright/test';
 
 export class ApiAssertions {
   /**
@@ -10,7 +10,7 @@ export class ApiAssertions {
       const bodyText = await response.text();
       expect(
         actualStatus,
-        `Expected status ${expectedStatus}, got ${actualStatus}. URL: ${response.url()}\nBody: ${bodyText}`
+        `Expected status ${expectedStatus}, got ${actualStatus}. URL: ${response.url()}\nBody: ${bodyText}`,
       ).toBe(expectedStatus);
     }
   }
@@ -23,7 +23,7 @@ export class ApiAssertions {
       const bodyText = await response.text();
       expect(
         response.ok(),
-        `Expected 2xx response, got ${response.status()}. URL: ${response.url()}\nBody: ${bodyText}`
+        `Expected 2xx response, got ${response.status()}. URL: ${response.url()}\nBody: ${bodyText}`,
       ).toBe(true);
     }
   }
@@ -31,7 +31,11 @@ export class ApiAssertions {
   /**
    * Verifies a specific response header exists and optionally matches an expected value.
    */
-  static toHaveHeader(response: APIResponse, headerName: string, expectedValue?: string | RegExp): void {
+  static toHaveHeader(
+    response: APIResponse,
+    headerName: string,
+    expectedValue?: string | RegExp,
+  ): void {
     const headers = response.headers();
     const actualValue = headers[headerName.toLowerCase()];
 
@@ -52,7 +56,7 @@ export class ApiAssertions {
   static async toHaveJsonProperty(
     response: APIResponse,
     propertyPath: string,
-    expectedValue?: unknown
+    expectedValue?: unknown,
   ): Promise<void> {
     const body = (await response.json()) as Record<string, unknown>;
     const keys = propertyPath.split('.');
@@ -60,7 +64,9 @@ export class ApiAssertions {
     let current: unknown = body;
     for (const key of keys) {
       if (current === null || typeof current !== 'object' || !(key in current)) {
-        throw new Error(`Property "${propertyPath}" not found in JSON response: ${JSON.stringify(body)}`);
+        throw new Error(
+          `Property "${propertyPath}" not found in JSON response: ${JSON.stringify(body)}`,
+        );
       }
       current = (current as Record<string, unknown>)[key];
     }

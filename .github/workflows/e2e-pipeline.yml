@@ -49,6 +49,12 @@ jobs:
       - name: Install Project Dependencies
         run: npm ci
 
+      - name: Run Static Checks
+        run: |
+          npm run lint
+          npm run format:check
+          npm exec -- tsc --noEmit
+
       - name: Run Unit Tests
         run: npm run test:unit
 

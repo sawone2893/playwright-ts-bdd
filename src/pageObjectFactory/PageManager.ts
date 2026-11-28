@@ -1,10 +1,10 @@
-import { Page} from "@playwright/test";
-import { PageHolder } from "../support/page-holder";
-import { LoginPage } from "../pages/LoginPage";
-import { InventoryPage } from "../pages/InventoryPage";
-import { CheckoutPage } from "../pages/CheckoutPage";
-import { IframeSandboxPage } from "../pages/IframeSandboxPage";
-import { WindowsDemoPage } from "../pages/WindowsDemoPage";
+import type { Page } from '@playwright/test';
+import { CheckoutPage } from '../pages/CheckoutPage';
+import { IframeSandboxPage } from '../pages/IframeSandboxPage';
+import { InventoryPage } from '../pages/InventoryPage';
+import { LoginPage } from '../pages/LoginPage';
+import { WindowsDemoPage } from '../pages/WindowsDemoPage';
+import type { PageHolder } from '../support/page-holder';
 
 export class PageManager {
   private readonly holder: PageHolder;

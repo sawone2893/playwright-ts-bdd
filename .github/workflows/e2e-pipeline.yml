@@ -70,6 +70,7 @@ jobs:
           CI: 'true'
           RECORD_VIDEO: 'true'
           ENABLE_TRACING: 'true'
+          CUCUMBER_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.browser }}
 
       # 2. Generate the Extent-style HTML report
       - name: Generate HTML Report
@@ -86,6 +87,12 @@ jobs:
             echo "Generated HTML report was not found or is empty."
             exit 1
           fi
+
+      - name: Report Retry Metrics
+        if: always()
+        run: npm run report:retries
+        env:
+          CUCUMBER_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.browser }}
 
       # 3. Upload the entire reports/ directory
       - name: Upload Test Report & Artifacts

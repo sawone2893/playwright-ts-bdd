@@ -15,6 +15,7 @@ import { PageManager } from "../pageObjectFactory/PageManager";
 import { ApiManager } from "../api/ApiManager";
 import { getScenarioResources } from "./scenario-resources";
 import { createArtifactName } from "./artifact-naming";
+import { recordRetry } from "./retry-metrics";
 
 setDefaultTimeout(config.defaultTimeout);
 
@@ -91,6 +92,26 @@ After(async function (this: CustomWorld, scenario) {
       console.error(`[Hooks] ${operation} failed`, error);
     }
   };
+
+  if (isFailed && scenario.willBeRetried) {
+    const retryRecord = {
+      featureUri: scenario.gherkinDocument.uri ?? "feature",
+      scenarioName: scenario.pickle.name,
+      pickleId: scenario.pickle.id,
+      failedAttemptId: scenario.testCaseStartedId,
+    };
+
+    console.warn(
+      `[Retry] Failed attempt will be retried: ${retryRecord.featureUri} - ${retryRecord.scenarioName}`,
+    );
+    await attempt("record retry metric", async () => {
+      const runId = process.env.CUCUMBER_RUN_ID;
+      if (!runId) {
+        throw new Error("CUCUMBER_RUN_ID was not set for this Cucumber run.");
+      }
+      recordRetry(runId, retryRecord);
+    });
+  }
 
   let videoPath: string | null = null;
 

@@ -12,5 +12,5 @@
     "resolveJsonModule": true,
     "sourceMap": true,
   },
-  "include": ["src/**/*", "features/**/*", "tests/**/*"]
+  "include": ["src/**/*", "features/**/*", "tests/**/*", "scripts/**/*"]
 }

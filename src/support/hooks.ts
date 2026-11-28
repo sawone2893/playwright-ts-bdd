@@ -52,12 +52,14 @@ Before(async function (this: CustomWorld,scenario) {
   const contextOptions = BrowserFactory.getContextOptions();
   this.context = await browser.newContext(contextOptions);
   
-// Start Playwright tracing for this scenario's context
-  await this.context.tracing.start({
-    screenshots: true,
-    snapshots: true,
-    sources: true,
-  });
+  // Start Playwright tracing for this scenario's context when enabled
+  if (config.enableTracing) {
+    await this.context.tracing.start({
+      screenshots: true,
+      snapshots: true,
+      sources: true,
+    });
+  }
 
   this.page = await this.context.newPage();
   // Scoped strictly to this scenario's thread:
@@ -105,7 +107,7 @@ After(async function (this: CustomWorld, scenario) {
   }
 
   // 2. Stop and save trace on failure (must happen BEFORE context.close())
-  if (context) {
+  if (context && config.enableTracing) {
     if (isFailed) {
       const tracesDir = path.resolve('reports/traces');
       fs.mkdirSync(tracesDir, { recursive: true });
@@ -119,7 +121,7 @@ After(async function (this: CustomWorld, scenario) {
   }
 
   // 3. Obtain video path reference before closing page
-  if (activePage) {
+  if (config.recordVideo && activePage) {
     const video = activePage.video();
     if (video) {
       videoPath = await video.path();

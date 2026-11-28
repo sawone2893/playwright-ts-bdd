@@ -20,7 +20,7 @@ The UI examples use SauceDemo. The API example uses JSONPlaceholder, and the ifr
 - Feature specifications live under `features/`; their step implementations are grouped by area under `src/steps/`.
 - Scenarios use behavior-focused Given/When/Then steps. The login feature uses a Scenario Outline for credential variations, and checkout uses data tables for products, shipping information, and expected order items.
 - Current tags are `@api`, `@api-only`, `@auth`, `@checkout`, `@e2e`, `@iframe`, `@negative`, `@positive`, `@regression`, `@smoke`, `@ui`, `@visual`, and `@windows`. Use `@api` for API scenarios, including hybrid UI/API scenarios; add `@api-only` when the scenario does not need a browser.
-- The Cucumber retry filter is `@flaky or not @smoke`: eligible non-smoke scenarios can be retried, as can scenarios tagged `@flaky`. No current feature is tagged `@flaky`.
+- Retries are limited to scenarios explicitly tagged `@flaky`; non-flaky scenarios are never retried. Failed attempts scheduled for retry are recorded in a run-specific `reports/cucumber-retries-<run-id>.jsonl` file. CI reports the retry rate and fails the run if any scenario needed a retry, so a retry-pass is not treated as clean.
 
 ### Scenario state and lifecycle
 
@@ -91,7 +91,8 @@ npm exec -- tsc --noEmit
 | Command | Purpose |
 | --- | --- |
 | `npm test` | Run the default Cucumber suite; its `pretest` hook first removes screenshots, videos, and traces |
-| `npm run test:unit` | Run unit tests, including browser launch options and scenario resource selection |
+| `npm run test:unit` | Run unit tests, including browser launch options, scenario resources, artifact names, and retry metrics |
+| `npm run report:retries` | Report the retry rate for the `CUCUMBER_RUN_ID` run; exits unsuccessfully if any retry occurred |
 | `npm run test:chrome:parallel` | Run Chromium scenarios using the configured worker/retry settings |
 | `npm run test:firefox:parallel` | Run Firefox scenarios using the configured worker/retry settings |
 | `npm run test:webkit:parallel` | Run WebKit scenarios using the configured worker/retry settings |
@@ -140,13 +141,14 @@ The GitHub Actions workflow in `.github/workflows/e2e-pipeline.yml` runs for pus
 | `package.json` | Dependencies and npm commands |
 | `package-lock.json` | Locked dependency tree used by `npm ci` |
 | `cucumber.mjs` | Cucumber profiles, step/support imports, formatters, and retry filter |
+| `scripts/report-retries.ts` | Reports retry counts/rate and fails when scenarios required retries |
 | `tsconfig.json` | Strict TypeScript compiler settings and included source paths |
 | `.gitignore` | Ignores dependencies, build output, reports, and matching env paths |
 | `generate-report.cjs` | Builds the expanded Cucumber HTML report |
 | `.github/workflows/e2e-pipeline.yml` | GitHub Actions test, report, and artifact workflow |
 | `.vscode/launch.json` | Debug current feature or current scenario line using the `single` profile |
 | `.vscode/settings.json` | Cucumber extension feature/glue patterns and editor parameter types |
-| `LICENSE` | Apache License 2.0 text; note `package.json` currently declares `ISC`, so reconcile the metadata before distribution |
+| `LICENSE` | Apache License 2.0 text; package metadata declares `Apache-2.0` |
 | `BDD Framework Masterclass.html` | Standalone BDD masterclass/instructor guide |
 | `playwright_cucumber_framework_dashboard.html` | Standalone framework dashboard/reference page |
 | `playwright_cucumber_framework_comprehensive_hub.html` | Standalone comprehensive framework hub/reference page |
@@ -182,6 +184,7 @@ These files contain application settings only; do not put the `ENV` selector in 
 | `src/support/custom-world.ts` | Cucumber World state for UI and API scenarios |
 | `src/support/hooks.ts` | Browser/API setup and teardown, tracing, failure artifacts, and Cucumber timeout |
 | `src/support/artifact-naming.ts` | Creates feature-, scenario-, and attempt-specific artifact names |
+| `src/support/retry-metrics.ts` | Records retry-triggering failures and calculates retry rate |
 | `src/support/scenario-resources.ts` | Resolves API and browser requirements from scenario tags |
 | `src/support/page-holder.ts` | Mutable active-page reference shared by page objects |
 | `src/base/BasePage.ts` | Shared Playwright navigation, frame/window, action, wait, and assertion operations |
@@ -210,5 +213,6 @@ These files contain application settings only; do not put the `ENV` selector in 
 | `tests/browser-factory.test.ts` | Verifies the launch options passed to Chromium, Firefox, and WebKit, plus the video-recording setting |
 | `tests/scenario-resources.test.ts` | Verifies UI, hybrid API/UI, and API-only resource selection |
 | `tests/artifact-naming.test.ts` | Verifies artifact names distinguish features and scenario attempts |
+| `tests/retry-metrics.test.ts` | Verifies retry-rate and retry-attempt calculations |
 
 `reports/` is generated at runtime and ignored by Git. `node_modules/` is installed from the package manifests and is not part of the framework source. Unit tests run with `npm run test:unit`; no separate lint command is currently defined.

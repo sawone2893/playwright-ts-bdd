@@ -61,4 +61,5 @@ try {
   console.log('\x1b[32m[Success]\x1b[0m HTML Report generated at: reports/html-report/index.html');
 } catch (error) {
   console.error('\x1b[31m[Report Generation Failed]:\x1b[0m', error);
+  process.exitCode = 1;
 }

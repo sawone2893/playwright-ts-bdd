@@ -1,4 +1,8 @@
+import { randomUUID } from 'node:crypto';
 import { config } from './src/support/config.ts';
+
+process.env.CUCUMBER_RUN_ID ??= randomUUID();
+console.log(`[Cucumber] Retry metrics run ID: ${process.env.CUCUMBER_RUN_ID}`);
 
 const common = {
   import: ['src/steps/**/*.ts', 'src/support/**/*.ts'],
@@ -13,7 +17,7 @@ const defaultProfile = {
   ...common,
   parallel: config.parallelWorkers,
   retry: config.retryCount,
-  retryTagFilter: '@flaky or not @smoke',
+  retryTagFilter: '@flaky',
 };
 
 const single = {

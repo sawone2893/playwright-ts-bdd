@@ -82,8 +82,6 @@ Playwright browsers must be installed in the local environment for the selected 
 | `npm run test:chrome:smoke` | Run scenarios tagged `@smoke` in Chromium |
 | `npm run test:chrome:negative` | Run scenarios tagged `@negative` in Chromium using the configured worker count |
 | `npm run test:chrome:checkout` | Run scenarios tagged `@checkout` in Chromium |
-| `npm run test:retry` | Run in Chromium using the configured retry count |
-| `npm run test:ci` | Run in Chromium using the configured worker and retry counts |
 | `npm run test:dev` | Run using the `dev` environment |
 | `npm run test:qa` | Run using the `qa` environment |
 | `npm run test:staging` | Run using the `staging` environment |

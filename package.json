@@ -7,7 +7,7 @@
   "scripts": {
     "clean": "node -e \"const fs = require('fs'); ['reports/screenshots', 'reports/videos', 'reports/traces'].forEach(dir => fs.rmSync(dir, { recursive: true, force: true }));\"",
     "pretest": "npm run clean",
-    "test:browser-options": "tsx --test tests/browser-factory.test.ts",
+    "test:unit": "tsx --test tests/browser-factory.test.ts tests/scenario-resources.test.ts",
     "test": "tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
     "test:chrome:headed": "cross-env BROWSER=chromium HEADLESS=false tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
     "test:firefox:headed": "cross-env BROWSER=firefox HEADLESS=false tsx node_modules/@cucumber/cucumber/bin/cucumber.js",

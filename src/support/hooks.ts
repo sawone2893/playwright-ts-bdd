@@ -14,6 +14,7 @@ import { config } from "./config";
 import { PageManager } from "../pageObjectFactory/PageManager";
 import { ApiManager } from "../api/ApiManager";
 import { getScenarioResources } from "./scenario-resources";
+import { createArtifactName } from "./artifact-naming";
 
 setDefaultTimeout(config.defaultTimeout);
 
@@ -25,7 +26,7 @@ AfterAll(async function () {
   }
 });
 
-Before(async function (this: CustomWorld,scenario) {
+Before(async function (this: CustomWorld, scenario) {
   const tags = scenario.pickle.tags.map((tag) => tag.name);
   const resources = getScenarioResources(tags);
 
@@ -67,95 +68,128 @@ Before(async function (this: CustomWorld,scenario) {
 });
 
 After(async function (this: CustomWorld, scenario) {
-
   const isFailed = scenario.result?.status === Status.FAILED;
-
-  // Attach last API response body on failure for debugging in Allure/HTML reports
-  if (isFailed && this.lastResponse) {
-    try {
-      const responseBody = await this.lastResponse.text();
-      this.attach(
-        `Status: ${this.lastResponse.status()}\nURL: ${this.lastResponse.url()}\nBody:\n${responseBody}`,
-        'text/plain'
-      );
-    } catch {
-      // Ignore if response stream was already disposed
-    }
-  }
-
-  //Dispose API context
-  if (this.apiContext) {
-    await this.apiContext.dispose();
-  }
-
   const activePage = this.pageManager?.page ?? this.page;
   const context = this.context;
-  const sanitizedName = scenario.pickle.name.replace(/[^a-zA-Z0-9]/g, '_');
+  const artifactName = createArtifactName(
+    scenario.gherkinDocument.uri ?? "feature",
+    scenario.pickle.name,
+    scenario.pickle.id,
+    scenario.testCaseStartedId,
+  );
+  const failures: Error[] = [];
+
+  const attempt = async (
+    operation: string,
+    action: () => Promise<void>,
+  ): Promise<void> => {
+    try {
+      await action();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      failures.push(new Error(`${operation} failed: ${message}`));
+      console.error(`[Hooks] ${operation} failed`, error);
+    }
+  };
 
   let videoPath: string | null = null;
 
-  // 1. Capture screenshot on failure (from whichever tab is currently active)
-  if (isFailed && activePage && !activePage.isClosed()) {
-    const screenshotDir = path.resolve('reports/screenshots');
-    fs.mkdirSync(screenshotDir, { recursive: true });
+  try {
+    const lastResponse = this.lastResponse;
+    if (isFailed && lastResponse) {
+      await attempt("attach last API response", async () => {
+        const responseBody = await lastResponse.text();
+        await this.attach(
+          `Status: ${lastResponse.status()}\nURL: ${lastResponse.url()}\nBody:\n${responseBody}`,
+          "text/plain",
+        );
+      });
+    }
 
-    const screenshot = await activePage.screenshot({
-      path: path.join(screenshotDir, `${sanitizedName}.png`),
-      fullPage: true,
+    if (isFailed && activePage && !activePage.isClosed()) {
+      await attempt("capture failure screenshot", async () => {
+        const screenshotDir = path.resolve("reports/screenshots");
+        fs.mkdirSync(screenshotDir, { recursive: true });
+
+        const screenshot = await activePage.screenshot({
+          path: path.join(screenshotDir, `${artifactName}.png`),
+          fullPage: true,
+        });
+        await this.attach(screenshot, "image/png");
+      });
+    }
+
+    if (context && config.enableTracing) {
+      await attempt(isFailed ? "save failure trace" : "stop trace", async () => {
+        if (isFailed) {
+          const tracesDir = path.resolve("reports/traces");
+          fs.mkdirSync(tracesDir, { recursive: true });
+
+          const tracePath = path.join(tracesDir, `${artifactName}.zip`);
+          await context.tracing.stop({ path: tracePath });
+          console.log(`Trace saved: ${tracePath}`);
+        } else {
+          await context.tracing.stop();
+        }
+      });
+    }
+
+    if (config.recordVideo && activePage) {
+      await attempt("resolve scenario video path", async () => {
+        const video = activePage.video();
+        if (video) {
+          videoPath = await video.path();
+        }
+      });
+    }
+  } finally {
+    await attempt("close scenario page", async () => {
+      if (activePage && !activePage.isClosed()) {
+        await activePage.close();
+      }
     });
-    this.attach(screenshot, 'image/png');
-  }
-
-  // 2. Stop and save trace on failure (must happen BEFORE context.close())
-  if (context && config.enableTracing) {
-    if (isFailed) {
-      const tracesDir = path.resolve('reports/traces');
-      fs.mkdirSync(tracesDir, { recursive: true });
-
-      const tracePath = path.join(tracesDir, `${sanitizedName}.zip`);
-      await context.tracing.stop({ path: tracePath });
-      console.log(`Trace saved: ${tracePath}`);
-    } else {
-      await context.tracing.stop();
-    }
-  }
-
-  // 3. Obtain video path reference before closing page
-  if (config.recordVideo && activePage) {
-    const video = activePage.video();
-    if (video) {
-      videoPath = await video.path();
-    }
-  }
-
-  // 4. Close page and context to allow Playwright to finalize video file
-  await activePage?.close();
-  await context?.close();
-
-  // 5. Handle video retention
-  if (videoPath && fs.existsSync(videoPath)) {
-    if (!isFailed) {
-      // Discard video for passed scenario
-      try {
-        fs.unlinkSync(videoPath);
-      } catch (err) {
-        console.warn(`Failed to delete passed video: ${videoPath}`, err);
+    await attempt("close scenario browser context", async () => {
+      if (context) {
+        await context.close();
       }
-    } else {
-      // Retain and rename video for failed scenario
-      const videosDir = path.resolve('reports/videos');
-      fs.mkdirSync(videosDir, { recursive: true });
+    });
+    await attempt("dispose API request context", async () => {
+      if (this.apiContext) {
+        await this.apiContext.dispose();
+      }
+    });
+  }
 
-      const targetVideoPath = path.join(videosDir, `${sanitizedName}.webm`);
-      try {
-        fs.renameSync(videoPath, targetVideoPath);
+  if (videoPath) {
+    const recordedVideoPath = videoPath;
+    await attempt(
+      isFailed ? "retain failure video" : "delete passing video",
+      async () => {
+        if (!fs.existsSync(recordedVideoPath)) {
+          throw new Error(`Recorded video was not found: ${recordedVideoPath}`);
+        }
 
-        // Attach video to Cucumber HTML report
+        if (!isFailed) {
+          fs.unlinkSync(recordedVideoPath);
+          return;
+        }
+
+        const videosDir = path.resolve("reports/videos");
+        fs.mkdirSync(videosDir, { recursive: true });
+
+        const targetVideoPath = path.join(videosDir, `${artifactName}.webm`);
+        fs.renameSync(recordedVideoPath, targetVideoPath);
+
         const videoBuffer = fs.readFileSync(targetVideoPath);
-        this.attach(videoBuffer, 'video/webm');
-      } catch (err) {
-        console.warn(`Failed to process failed video: ${videoPath}`, err);
-      }
-    }
+        await this.attach(videoBuffer, "video/webm");
+      },
+    );
+  }
+
+  if (failures.length > 0) {
+    throw new AggregateError(
+      failures,
+      `Scenario teardown encountered ${failures.length} error(s): ${scenario.pickle.name}`,
+    );
   }
 });

@@ -26,7 +26,7 @@ The UI examples use SauceDemo. The API example uses JSONPlaceholder, and the ifr
 
 - `CustomWorld` holds scenario-scoped browser, context, page, page manager, API context, API manager, and last API response references.
 - Cucumber hooks launch a browser lazily once per worker when the first browser-backed scenario runs. Scenarios tagged `@api` get a fresh API request context and browser context/page, supporting hybrid UI/API tests. Scenarios tagged `@api-only` get an API context but no browser; scenarios without either API tag do not create an API context.
-- Each UI context starts Playwright tracing. On failure, the hooks save a trace and screenshot, retain and attach the video, and attach the last API response body when available. Passing-scenario videos are deleted. Contexts and pages are closed after each scenario.
+- Each UI context starts Playwright tracing. On failure, the hooks save a trace and screenshot, retain and attach the video, and attach the last API response body when available. Artifact names include feature, scenario, and attempt identities to avoid collisions. Artifact errors are reported after scenario resources have been closed.
 - Cucumber's default step timeout comes from `TIMEOUT` (60,000 ms fallback). The shared UI assertion helpers use a 5,000 ms fallback; API requests use `API_TIMEOUT` (15,000 ms fallback).
 
 ### UI page layer
@@ -181,6 +181,7 @@ These files contain application settings only; do not put the `ENV` selector in 
 | `src/support/browser-factory.ts` | Browser launch, device context options, viewport, and video recording |
 | `src/support/custom-world.ts` | Cucumber World state for UI and API scenarios |
 | `src/support/hooks.ts` | Browser/API setup and teardown, tracing, failure artifacts, and Cucumber timeout |
+| `src/support/artifact-naming.ts` | Creates feature-, scenario-, and attempt-specific artifact names |
 | `src/support/scenario-resources.ts` | Resolves API and browser requirements from scenario tags |
 | `src/support/page-holder.ts` | Mutable active-page reference shared by page objects |
 | `src/base/BasePage.ts` | Shared Playwright navigation, frame/window, action, wait, and assertion operations |
@@ -208,5 +209,6 @@ These files contain application settings only; do not put the `ENV` selector in 
 | --- | --- |
 | `tests/browser-factory.test.ts` | Verifies the launch options passed to Chromium, Firefox, and WebKit, plus the video-recording setting |
 | `tests/scenario-resources.test.ts` | Verifies UI, hybrid API/UI, and API-only resource selection |
+| `tests/artifact-naming.test.ts` | Verifies artifact names distinguish features and scenario attempts |
 
 `reports/` is generated at runtime and ignored by Git. `node_modules/` is installed from the package manifests and is not part of the framework source. Unit tests run with `npm run test:unit`; no separate lint command is currently defined.

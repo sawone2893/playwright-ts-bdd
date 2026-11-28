@@ -28,7 +28,7 @@
     "test:apifeature": "npx cross-env tsx node_modules/@cucumber/cucumber/bin/cucumber.js features/api/user_api.feature",
     "test-trace": "npx playwright show-trace reports/traces/Complete_end_to_end_checkout_with_multiple_items.zip",
     "report": "node generate-report.cjs",
-    "test:report": "npm run test:chrome || npm run report"
+    "test:report": "npm run test:chrome:parallel && npm run report"
   },
   "repository": {
     "type": "git",

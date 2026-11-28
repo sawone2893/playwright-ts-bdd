@@ -51,9 +51,11 @@ jobs:
       - name: Ensure Reports Directory Exists
         run: mkdir -p reports
 
-      # 1. Execute tests without aborting the workflow on failure
+      # Keep the test outcome so reports can still be generated before the job fails.
       - name: Execute Cucumber Test Suite
-        run: npm test || true
+        id: cucumber
+        continue-on-error: true
+        run: npm test
         env:
           ENV: ${{ github.event.inputs.environment || 'qa' }}
           BROWSER: ${{ github.event.inputs.browser || 'chromium' }}
@@ -78,32 +80,47 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-      # 4. Enforce pass/fail status in GitHub Actions based on test results
+      # 4. Enforce the original test outcome after report generation and upload
       - name: Verify Test Results
         if: always()
+        env:
+          CUCUMBER_OUTCOME: ${{ steps.cucumber.outcome }}
         run: |
-          node -e "
-            const fs = require('fs');
-            const reportPath = 'reports/cucumber-report.json';
-            if (!fs.existsSync(reportPath)) {
-              console.error('Cucumber JSON report file was not found!');
-              process.exit(1);
-            }
-            const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
-            let hasFailures = false;
-            for (const feature of report) {
-              for (const element of (feature.elements || [])) {
-                for (const step of (element.steps || [])) {
-                  if (step.result && step.result.status === 'failed') {
-                    hasFailures = true;
-                    console.error('Failed step in scenario: ' + element.name);
-                  }
-                }
-              }
-            }
-            if (hasFailures) {
-              console.error('Suite contains failed scenarios.');
-              process.exit(1);
-            }
-            console.log('All Cucumber scenarios passed successfully.');
-          "
+          if [ "$CUCUMBER_OUTCOME" != "success" ]; then
+            echo "Cucumber test suite did not succeed (outcome: $CUCUMBER_OUTCOME)."
+            exit 1
+          fi
+
+          node <<'NODE'
+          const fs = require('node:fs');
+          const reportPath = 'reports/cucumber-report.json';
+
+          if (!fs.existsSync(reportPath)) {
+            console.error('Cucumber JSON report file was not found.');
+            process.exit(1);
+          }
+
+          const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+          const scenarios = report.flatMap(feature => feature.elements || [])
+            .filter(element => element.type === 'scenario');
+
+          if (scenarios.length === 0) {
+            console.error('Cucumber report contains no executed scenarios.');
+            process.exit(1);
+          }
+
+          const unsuccessfulStatuses = new Set(['failed', 'undefined', 'pending', 'ambiguous']);
+          const unsuccessfulSteps = scenarios.flatMap(scenario =>
+            (scenario.steps || [])
+              .filter(step => unsuccessfulStatuses.has(step.result?.status))
+              .map(step => `${scenario.name}: ${step.name} (${step.result.status})`)
+          );
+
+          if (unsuccessfulSteps.length > 0) {
+            console.error('Cucumber report contains unsuccessful steps:');
+            unsuccessfulSteps.forEach(step => console.error(`- ${step}`));
+            process.exit(1);
+          }
+
+          console.log(`All ${scenarios.length} Cucumber scenarios passed.`);
+          NODE

@@ -1,12 +1,6 @@
-import {
-  Page,
-  Locator,
-  FrameLocator,
-  BrowserContext,
-  expect,
-} from "@playwright/test";
-import { PageHolder } from "../support/page-holder";
-import { UiAssertions } from "../assertions/UiAssertions";
+import type { BrowserContext, FrameLocator, Locator, Page } from '@playwright/test';
+import { UiAssertions } from '../assertions/UiAssertions';
+import type { PageHolder } from '../support/page-holder';
 
 export interface ActionOptions {
   /**
@@ -42,15 +36,10 @@ export abstract class BasePage {
    * Triggers an action that spawns a new window, waits for it,
    * updates the shared holder, and brings the new tab to the front.
    */
-  async openAndSwitchToNewWindow(
-    triggerAction: () => Promise<void>,
-  ): Promise<Page> {
-    const [newPage] = await Promise.all([
-      this.context.waitForEvent("page"),
-      triggerAction(),
-    ]);
+  async openAndSwitchToNewWindow(triggerAction: () => Promise<void>): Promise<Page> {
+    const [newPage] = await Promise.all([this.context.waitForEvent('page'), triggerAction()]);
 
-    await newPage.waitForLoadState("domcontentloaded");
+    await newPage.waitForLoadState('domcontentloaded');
     this.holder.current = newPage;
     await newPage.bringToFront();
     return newPage;
@@ -79,7 +68,7 @@ export abstract class BasePage {
       const url = p.url();
 
       const isMatch =
-        typeof identifier === "string"
+        typeof identifier === 'string'
           ? title.includes(identifier) || url.includes(identifier)
           : identifier.test(title) || identifier.test(url);
 
@@ -122,7 +111,7 @@ export abstract class BasePage {
   // --- Navigation & Window Management ---
 
   async goto(url: string): Promise<void> {
-    await this.page.goto(url, { waitUntil: "domcontentloaded" });
+    await this.page.goto(url, { waitUntil: 'domcontentloaded' });
   }
 
   async getPageTitle(): Promise<string> {
@@ -134,7 +123,7 @@ export abstract class BasePage {
   }
 
   async reload(): Promise<void> {
-    await this.page.reload({ waitUntil: "domcontentloaded" });
+    await this.page.reload({ waitUntil: 'domcontentloaded' });
   }
 
   async bringToFront(): Promise<void> {
@@ -150,21 +139,15 @@ export abstract class BasePage {
    * waits for the new page to be created, and returns the new Page instance.
    */
   async openNewWindow(triggerAction: () => Promise<void>): Promise<Page> {
-    const [newPage] = await Promise.all([
-      this.context.waitForEvent("page"),
-      triggerAction(),
-    ]);
-    await newPage.waitForLoadState("domcontentloaded");
+    const [newPage] = await Promise.all([this.context.waitForEvent('page'), triggerAction()]);
+    await newPage.waitForLoadState('domcontentloaded');
     return newPage;
   }
 
   /**
    * Helper to click an element and immediately capture the opened window/tab.
    */
-  async clickAndOpenNewWindow(
-    selector: string | Locator,
-    options?: ActionOptions,
-  ): Promise<Page> {
+  async clickAndOpenNewWindow(selector: string | Locator, options?: ActionOptions): Promise<Page> {
     return await this.openNewWindow(async () => {
       await this.click(selector, options);
     });
@@ -177,13 +160,13 @@ export abstract class BasePage {
    * Example: this.resolveFrame(['#parent-iframe', '#child-iframe'])
    */
   resolveFrame(frame: string | string[] | FrameLocator): FrameLocator {
-    if (typeof frame !== "string" && !Array.isArray(frame)) {
+    if (typeof frame !== 'string' && !Array.isArray(frame)) {
       return frame;
     }
 
     const selectors = Array.isArray(frame) ? frame : [frame];
     if (selectors.length === 0) {
-      throw new Error("Frame selector array cannot be empty.");
+      throw new Error('Frame selector array cannot be empty.');
     }
 
     let currentFrame: FrameLocator = this.page.frameLocator(selectors[0]);
@@ -203,11 +186,8 @@ export abstract class BasePage {
 
   // --- Centralized Locator Resolver ---
 
-  protected getLocator(
-    selector: string | Locator,
-    options?: ActionOptions,
-  ): Locator {
-    if (typeof selector !== "string") {
+  protected getLocator(selector: string | Locator, options?: ActionOptions): Locator {
+    if (typeof selector !== 'string') {
       return selector;
     }
 
@@ -231,8 +211,8 @@ export abstract class BasePage {
     options?: ActionOptions & { delay?: number },
   ): Promise<void> {
     const element = this.getLocator(selector, options);
-    await element.waitFor({ state: "visible", timeout: options?.timeout });
-    await element.fill("", { timeout: options?.timeout });
+    await element.waitFor({ state: 'visible', timeout: options?.timeout });
+    await element.fill('', { timeout: options?.timeout });
 
     if (options?.delay && options.delay > 0) {
       await element.pressSequentially(text, {
@@ -253,32 +233,21 @@ export abstract class BasePage {
     await this.write(selector, text, { ...options, delay });
   }
 
-  async click(
-    selector: string | Locator,
-    options?: ActionOptions,
-  ): Promise<void> {
+  async click(selector: string | Locator, options?: ActionOptions): Promise<void> {
     const element = this.getLocator(selector, options);
-    await element.waitFor({ state: "visible", timeout: options?.timeout });
+    await element.waitFor({ state: 'visible', timeout: options?.timeout });
     await element.click({ timeout: options?.timeout });
   }
 
-  async getText(
-    selector: string | Locator,
-    options?: ActionOptions,
-  ): Promise<string> {
+  async getText(selector: string | Locator, options?: ActionOptions): Promise<string> {
     const element = this.getLocator(selector, options);
-    await element.waitFor({ state: "visible", timeout: options?.timeout });
-    return (
-      (await element.textContent({ timeout: options?.timeout }))?.trim() ?? ""
-    );
+    await element.waitFor({ state: 'visible', timeout: options?.timeout });
+    return (await element.textContent({ timeout: options?.timeout }))?.trim() ?? '';
   }
 
-  async getInputValue(
-    selector: string | Locator,
-    options?: ActionOptions,
-  ): Promise<string> {
+  async getInputValue(selector: string | Locator, options?: ActionOptions): Promise<string> {
     const element = this.getLocator(selector, options);
-    await element.waitFor({ state: "visible", timeout: options?.timeout });
+    await element.waitFor({ state: 'visible', timeout: options?.timeout });
     return await element.inputValue({ timeout: options?.timeout });
   }
 
@@ -288,7 +257,7 @@ export abstract class BasePage {
     options?: ActionOptions,
   ): Promise<string[]> {
     const element = this.getLocator(selector, options);
-    await element.waitFor({ state: "visible", timeout: options?.timeout });
+    await element.waitFor({ state: 'visible', timeout: options?.timeout });
     return await element.selectOption({ value }, { timeout: options?.timeout });
   }
 
@@ -298,34 +267,25 @@ export abstract class BasePage {
     options?: ActionOptions,
   ): Promise<string[]> {
     const element = this.getLocator(selector, options);
-    await element.waitFor({ state: "visible", timeout: options?.timeout });
+    await element.waitFor({ state: 'visible', timeout: options?.timeout });
     return await element.selectOption({ label }, { timeout: options?.timeout });
   }
 
-  async check(
-    selector: string | Locator,
-    options?: ActionOptions,
-  ): Promise<void> {
+  async check(selector: string | Locator, options?: ActionOptions): Promise<void> {
     const element = this.getLocator(selector, options);
-    await element.waitFor({ state: "visible", timeout: options?.timeout });
+    await element.waitFor({ state: 'visible', timeout: options?.timeout });
     await element.check({ timeout: options?.timeout });
   }
 
-  async uncheck(
-    selector: string | Locator,
-    options?: ActionOptions,
-  ): Promise<void> {
+  async uncheck(selector: string | Locator, options?: ActionOptions): Promise<void> {
     const element = this.getLocator(selector, options);
-    await element.waitFor({ state: "visible", timeout: options?.timeout });
+    await element.waitFor({ state: 'visible', timeout: options?.timeout });
     await element.uncheck({ timeout: options?.timeout });
   }
 
-  async hover(
-    selector: string | Locator,
-    options?: ActionOptions,
-  ): Promise<void> {
+  async hover(selector: string | Locator, options?: ActionOptions): Promise<void> {
     const element = this.getLocator(selector, options);
-    await element.waitFor({ state: "visible", timeout: options?.timeout });
+    await element.waitFor({ state: 'visible', timeout: options?.timeout });
     await element.hover({ timeout: options?.timeout });
   }
 
@@ -353,11 +313,7 @@ export abstract class BasePage {
     timeout = 5000,
     options?: ActionOptions,
   ): Promise<void> {
-    await UiAssertions.toHaveText(
-      this.getLocator(selector, options),
-      expectedText,
-      timeout,
-    );
+    await UiAssertions.toHaveText(this.getLocator(selector, options), expectedText, timeout);
   }
 
   async expectToContainText(
@@ -377,7 +333,7 @@ export abstract class BasePage {
 
   async waitForElementState(
     selector: string | Locator,
-    state: "attached" | "detached" | "visible" | "hidden",
+    state: 'attached' | 'detached' | 'visible' | 'hidden',
     timeout = 10000,
     options?: ActionOptions,
   ): Promise<void> {
@@ -386,6 +342,6 @@ export abstract class BasePage {
   }
 
   async waitForPageNetworkIdle(): Promise<void> {
-    await this.page.waitForLoadState("networkidle");
+    await this.page.waitForLoadState('networkidle');
   }
 }

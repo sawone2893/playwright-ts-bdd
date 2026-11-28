@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
-import * as path from 'path';
 import * as fs from 'fs';
+import * as path from 'path';
 
 const environments = ['dev', 'qa', 'staging', 'prod', 'local'] as const;
 const browsers = ['chromium', 'firefox', 'webkit'] as const;
@@ -35,7 +35,9 @@ const readEnvFile = (filePath: string): Record<string, string> =>
   fs.existsSync(filePath) ? dotenv.parse(fs.readFileSync(filePath)) : {};
 
 if (!fs.existsSync(targetEnvPath)) {
-  console.warn(`[Config] Warning: Environment file not found at ${targetEnvPath}. Using available defaults.`);
+  console.warn(
+    `[Config] Warning: Environment file not found at ${targetEnvPath}. Using available defaults.`,
+  );
 }
 
 const fileEnvironment = {
@@ -86,7 +88,9 @@ const getBoolean = (name: string, fallback: boolean): boolean => {
     case 'false':
       return false;
     default:
-      throw new Error(`Invalid configuration: ${name} must be "true" or "false"; received "${value}".`);
+      throw new Error(
+        `Invalid configuration: ${name} must be "true" or "false"; received "${value}".`,
+      );
   }
 };
 

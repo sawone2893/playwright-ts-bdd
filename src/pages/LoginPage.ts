@@ -1,6 +1,6 @@
-import { PageHolder } from '../support/page-holder';
 import { BasePage } from '../base/BasePage';
 import { config } from '../support/config';
+import type { PageHolder } from '../support/page-holder';
 
 export class LoginPage extends BasePage {
   private readonly usernameInput = '#user-name';

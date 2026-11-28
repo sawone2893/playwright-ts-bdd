@@ -1,5 +1,5 @@
-import { PageHolder } from '../support/page-holder';
 import { BasePage } from '../base/BasePage';
+import type { PageHolder } from '../support/page-holder';
 
 export class InventoryPage extends BasePage {
   private readonly cartIcon = '.shopping_cart_link';

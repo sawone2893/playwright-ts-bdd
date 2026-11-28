@@ -1,5 +1,5 @@
-import { PageHolder } from '../support/page-holder';
 import { BasePage } from '../base/BasePage';
+import type { PageHolder } from '../support/page-holder';
 
 export class IframeSandboxPage extends BasePage {
   // Using the-internet.herokuapp.com/iframe
@@ -25,7 +25,9 @@ export class IframeSandboxPage extends BasePage {
 
   async verifyEditorContent(expectedText: string): Promise<void> {
     // Tests your BasePage expectToHaveText() with a single frame
-    await this.expectToHaveText(this.editorBody, expectedText, 5000, { frame: this.iframeSelector });
+    await this.expectToHaveText(this.editorBody, expectedText, 5000, {
+      frame: this.iframeSelector,
+    });
   }
 
   async navigateToNestedFrames(): Promise<void> {
@@ -34,6 +36,8 @@ export class IframeSandboxPage extends BasePage {
 
   async verifyNestedMiddleFrameText(expectedText: string): Promise<void> {
     // Tests your BasePage expectToHaveText() with nested frame array!
-    await this.expectToHaveText(this.middleContent, expectedText, 5000, { frame: this.nestedFrames });
+    await this.expectToHaveText(this.middleContent, expectedText, 5000, {
+      frame: this.nestedFrames,
+    });
   }
 }

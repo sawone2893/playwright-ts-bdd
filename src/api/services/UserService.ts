@@ -1,6 +1,6 @@
-import { APIRequestContext, APIResponse } from '@playwright/test';
+import type { APIRequestContext, APIResponse } from '@playwright/test';
 import { BaseApiClient } from '../core/BaseApiClient';
-import { CreateUserRequest } from '../models/user.model';
+import type { CreateUserRequest } from '../models/user.model';
 
 export class UserService extends BaseApiClient {
   private readonly basePath = '/users';

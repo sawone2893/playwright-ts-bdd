@@ -7,7 +7,10 @@
   "scripts": {
     "clean": "node -e \"const fs = require('fs'); ['reports/screenshots', 'reports/videos', 'reports/traces'].forEach(dir => fs.rmSync(dir, { recursive: true, force: true }));\"",
     "pretest": "npm run clean",
-    "test:unit": "tsx --test tests/browser-factory.test.ts tests/scenario-resources.test.ts tests/artifact-naming.test.ts tests/retry-metrics.test.ts",
+    "lint": "biome ci --formatter-enabled=false --assist-enabled=false src tests scripts cucumber.mjs generate-report.cjs",
+    "format": "biome format src tests scripts cucumber.mjs generate-report.cjs package.json tsconfig.json biome.json --write",
+    "format:check": "biome ci --linter-enabled=false --assist-enabled=false src tests scripts cucumber.mjs generate-report.cjs package.json tsconfig.json biome.json",
+    "test:unit": "tsx --test tests/browser-factory.test.ts tests/scenario-resources.test.ts tests/artifact-naming.test.ts tests/retry-metrics.test.ts tests/config-validation.test.ts tests/teardown-actions.test.ts",
     "report:retries": "tsx scripts/report-retries.ts",
     "test": "tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
     "test:chrome:headed": "cross-env BROWSER=chromium HEADLESS=false tsx node_modules/@cucumber/cucumber/bin/cucumber.js",
@@ -44,6 +47,7 @@
   },
   "homepage": "https://github.com/sawone2893/playwright-ts-bdd#readme",
   "devDependencies": {
+    "@biomejs/biome": "^2.6.9",
     "@cucumber/cucumber": "^13.3.0",
     "@playwright/test": "^1.64.1",
     "@types/node": "^26.6.5",

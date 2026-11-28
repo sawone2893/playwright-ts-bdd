@@ -1,5 +1,5 @@
-import * as fs from "node:fs";
-import * as path from "node:path";
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 export interface RetryRecord {
   featureUri: string;
@@ -16,18 +16,18 @@ export interface RetrySummary {
 }
 
 export function getRetryMetricsPath(runId: string): string {
-  const safeRunId = runId.replace(/[^a-zA-Z0-9_-]/g, "_");
+  const safeRunId = runId.replace(/[^a-zA-Z0-9_-]/g, '_');
   if (!safeRunId) {
-    throw new Error("A non-empty Cucumber run ID is required for retry metrics.");
+    throw new Error('A non-empty Cucumber run ID is required for retry metrics.');
   }
 
-  return path.resolve("reports", `cucumber-retries-${safeRunId}.jsonl`);
+  return path.resolve('reports', `cucumber-retries-${safeRunId}.jsonl`);
 }
 
 export function recordRetry(runId: string, record: RetryRecord): void {
   const metricsPath = getRetryMetricsPath(runId);
   fs.mkdirSync(path.dirname(metricsPath), { recursive: true });
-  fs.appendFileSync(metricsPath, `${JSON.stringify(record)}\n`, "utf8");
+  fs.appendFileSync(metricsPath, `${JSON.stringify(record)}\n`, 'utf8');
 }
 
 export function summarizeRetries(
@@ -35,18 +35,15 @@ export function summarizeRetries(
   records: readonly RetryRecord[],
 ): RetrySummary {
   if (!Number.isSafeInteger(scenarioCount) || scenarioCount < 0) {
-    throw new Error("Scenario count must be a non-negative integer.");
+    throw new Error('Scenario count must be a non-negative integer.');
   }
 
-  const retriedScenarioCount = new Set(
-    records.map((record) => record.pickleId),
-  ).size;
+  const retriedScenarioCount = new Set(records.map((record) => record.pickleId)).size;
 
   return {
     scenarioCount,
     retriedScenarioCount,
     retryAttemptCount: records.length,
-    retryRate:
-      scenarioCount === 0 ? 0 : retriedScenarioCount / scenarioCount,
+    retryRate: scenarioCount === 0 ? 0 : retriedScenarioCount / scenarioCount,
   };
 }

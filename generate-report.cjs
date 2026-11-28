@@ -23,7 +23,9 @@ const jsonFilePath = path.resolve(process.cwd(), 'reports/cucumber-report.json')
 // Verify that the cucumber test output exists
 if (!fs.existsSync(jsonFilePath)) {
   console.error(`\x1b[31m[Report Error]\x1b[0m File not found: ${jsonFilePath}`);
-  console.error('Make sure your tests ran and produced cucumber-report.json before generating the report.');
+  console.error(
+    'Make sure your tests ran and produced cucumber-report.json before generating the report.',
+  );
   process.exit(1);
 }
 

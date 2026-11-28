@@ -6,11 +6,7 @@ console.log(`[Cucumber] Retry metrics run ID: ${process.env.CUCUMBER_RUN_ID}`);
 
 const common = {
   import: ['src/steps/**/*.ts', 'src/support/**/*.ts'],
-  format: [
-    'summary',
-    'html:reports/cucumber-report.html',
-    'json:reports/cucumber-report.json',
-  ],
+  format: ['summary', 'html:reports/cucumber-report.html', 'json:reports/cucumber-report.json'],
 };
 
 const defaultProfile = {

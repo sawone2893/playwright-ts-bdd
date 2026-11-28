@@ -1,5 +1,12 @@
-import { chromium, firefox, webkit, Browser, devices, BrowserContextOptions } from '@playwright/test';
-import { config, BrowserType } from './config';
+import {
+  type Browser,
+  type BrowserContextOptions,
+  chromium,
+  devices,
+  firefox,
+  webkit,
+} from '@playwright/test';
+import { type BrowserType, config } from './config';
 
 export class BrowserFactory {
   static async getBrowser(browserName: BrowserType = config.browser): Promise<Browser> {

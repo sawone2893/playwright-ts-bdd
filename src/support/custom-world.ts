@@ -1,6 +1,6 @@
 import { setWorldConstructor, World, IWorldOptions } from '@cucumber/cucumber';
 import { Browser, BrowserContext, Page, APIRequestContext, APIResponse } from '@playwright/test';
-import { PageManager } from '../pages/PageManager';
+import { PageManager } from '../pageObjectFactory/PageManager';
 import { ApiManager } from '../api/ApiManager';
 
 export interface CustomWorld extends World {

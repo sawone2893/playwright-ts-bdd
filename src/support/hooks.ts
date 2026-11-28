@@ -12,7 +12,7 @@ import * as path from "path";
 import { CustomWorld } from "./custom-world";
 import { BrowserFactory } from "./browser-factory";
 import { config } from "./config";
-import { PageManager } from "../pages/PageManager";
+import { PageManager } from "../pageObjectFactory/PageManager";
 import { ApiManager } from "../api/ApiManager";
 
 setDefaultTimeout(config.defaultTimeout);

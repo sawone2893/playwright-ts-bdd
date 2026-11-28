@@ -1,5 +1,5 @@
 import { PageHolder } from '../support/page-holder';
-import { BasePage } from './BasePage';
+import { BasePage } from '../base/BasePage';
 import { config } from '../support/config';
 
 export class LoginPage extends BasePage {

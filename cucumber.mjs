@@ -7,9 +7,20 @@ const common = {
     'html:reports/cucumber-report.html',
     'json:reports/cucumber-report.json',
   ],
+};
+
+const defaultProfile = {
+  ...common,
   parallel: config.parallelWorkers,
   retry: config.retryCount,
   retryTagFilter: '@flaky or not @smoke',
 };
 
-export default common;
+const single = {
+  ...common,
+  format: ['summary'],
+  parallel: 1,
+  retry: 0,
+};
+
+export { defaultProfile as default, single };

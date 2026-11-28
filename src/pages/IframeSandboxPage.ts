@@ -1,5 +1,5 @@
 import { PageHolder } from '../support/page-holder';
-import { BasePage } from './BasePage';
+import { BasePage } from '../base/BasePage';
 
 export class IframeSandboxPage extends BasePage {
   // Using the-internet.herokuapp.com/iframe

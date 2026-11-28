@@ -1,6 +1,6 @@
 // src/pages/WindowsDemoPage.ts
 import { PageHolder } from '../support/page-holder';
-import { BasePage } from './BasePage';
+import { BasePage } from '../base/BasePage';
 
 export class WindowsDemoPage extends BasePage {
   private readonly clickHereLink = 'a[href="/windows/new"]';

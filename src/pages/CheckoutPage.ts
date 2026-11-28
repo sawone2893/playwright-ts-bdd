@@ -1,5 +1,5 @@
 import { PageHolder } from '../support/page-holder';
-import { BasePage } from './BasePage';
+import { BasePage } from '../base/BasePage';
 
 export interface ShippingInfo {
   firstName: string;

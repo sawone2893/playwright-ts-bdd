@@ -6,7 +6,6 @@ export class BrowserFactory {
     const launchOptions = {
       headless: config.headless,
       slowMo: config.slowMo,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
     };
 
     switch (browserName.toLowerCase()) {
@@ -16,20 +15,24 @@ export class BrowserFactory {
         return await webkit.launch(launchOptions);
       case 'chromium':
       default:
-        return await chromium.launch(launchOptions);
+        return await chromium.launch({
+          ...launchOptions,
+          args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+        });
     }
   }
 
   static getContextOptions(deviceName?: string): BrowserContextOptions {
     const targetDevice = deviceName || config.device;
 
-    // Common video recording configuration for all contexts
-    const videoConfig = {
-      recordVideo: {
-        dir: 'reports/videos/',
-        size: { width: 1280, height: 720 },
-      },
-    };
+    const videoConfig = config.recordVideo
+      ? {
+          recordVideo: {
+            dir: 'reports/videos/',
+            size: { width: 1280, height: 720 },
+          },
+        }
+      : {};
 
     if (targetDevice && devices[targetDevice]) {
       return {

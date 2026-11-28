@@ -127,6 +127,8 @@ export interface AppConfig {
   apiTimeout: number;
   browser: BrowserType;
   headless: boolean;
+  recordVideo: boolean;
+  enableTracing: boolean;
   device?: string;
   parallelWorkers: number;
   retryCount: number;
@@ -141,6 +143,8 @@ export const config: AppConfig = {
   apiTimeout: getInteger('API_TIMEOUT', 15000, 1),
   browser: parseEnum('BROWSER', values.BROWSER, browsers, 'chromium'),
   headless: getBoolean('HEADLESS', true),
+  recordVideo: getBoolean('RECORD_VIDEO', false),
+  enableTracing: getBoolean('ENABLE_TRACING', false),
   device: getOptionalString('DEVICE'),
   parallelWorkers: getInteger('PARALLEL', 4, 1),
   retryCount: getInteger('RETRY', 2, 0),

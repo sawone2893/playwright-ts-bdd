@@ -28,9 +28,13 @@ on:
 
 jobs:
   test:
-    name: Run Automated E2E Tests
+    name: Run E2E Tests (${{ matrix.browser }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: ${{ fromJSON(github.event_name == 'workflow_dispatch' && format('["{0}"]', github.event.inputs.browser) || '["chromium","firefox","webkit"]') }}
 
     steps:
       - name: Checkout Source Code
@@ -45,8 +49,11 @@ jobs:
       - name: Install Project Dependencies
         run: npm ci
 
+      - name: Verify Browser Launch Options
+        run: npm run test:browser-options
+
       - name: Install Playwright Browsers & OS Dependencies
-        run: npx playwright install --with-deps
+        run: npx playwright install --with-deps ${{ matrix.browser }}
 
       - name: Ensure Reports Directory Exists
         run: mkdir -p reports
@@ -58,9 +65,11 @@ jobs:
         run: npm test
         env:
           ENV: ${{ github.event.inputs.environment || 'qa' }}
-          BROWSER: ${{ github.event.inputs.browser || 'chromium' }}
+          BROWSER: ${{ matrix.browser }}
           HEADLESS: 'true'
           CI: 'true'
+          RECORD_VIDEO: 'true'
+          ENABLE_TRACING: 'true'
 
       # 2. Generate the Extent-style HTML report
       - name: Generate HTML Report
@@ -68,14 +77,14 @@ jobs:
         run: node generate-report.cjs
         env:
           ENV: ${{ github.event.inputs.environment || 'qa' }}
-          BROWSER: ${{ github.event.inputs.browser || 'chromium' }}
+          BROWSER: ${{ matrix.browser }}
 
       # 3. Upload the entire reports/ directory
       - name: Upload Test Report & Artifacts
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: full-execution-report
+          name: full-execution-report-${{ matrix.browser }}
           path: reports/
           if-no-files-found: warn
           retention-days: 14

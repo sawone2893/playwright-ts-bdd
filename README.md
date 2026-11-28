@@ -30,10 +30,10 @@ An end-to-end browser automation framework built with Playwright, TypeScript, an
 ### Configuration and environments
 
 - `src/support/config.ts` centralizes environment, base URL, browser, headless mode, device, worker-count and retry-count values, timeout, and slow motion.
-- Select an environment with `ENV`; supported names are `dev`, `qa`, `staging`, `prod`, and `local`. The default is `qa`.
-- Environment files are loaded from `env/`: the shared `env/.env` file is loaded first, then `env/.env.<environment>` overrides it. Environment variables supplied by the process are also used for configuration.
+- Select an environment once with the runner's `ENV` variable; supported names are `dev`, `qa`, `staging`, `prod`, and `local`, with `qa` as the default. Do not add `ENV` to `env/.env` or `env/.env.<environment>`; it selects which environment file to load and is read only from the process environment.
+- Environment files are loaded from `env/` with this precedence for application settings: process environment, `env/.env.<environment>`, `env/.env`, then code defaults.
 - Keep environment-specific values in local `env/.env*` files and do not commit secrets. These files are excluded by `.gitignore`.
-- Configuration variables read by `src/support/config.ts` include `BASE_URL`, `BROWSER`, `HEADLESS`, `DEVICE`, `PARALLEL`, `RETRY`, `TIMEOUT`, and `SLOW_MO`. Defaults include SauceDemo as the base URL, Chromium, headless mode, a 60-second Cucumber timeout, and no slow motion. Although `PARALLEL` and `RETRY` are parsed into the config object, Cucumber's effective worker and retry defaults are set separately in `cucumber.json` (four workers and two retries); npm scripts may also pass Cucumber CLI overrides.
+- `src/support/config.ts` reads `ENV` from the process to select the environment, and reads application settings from `BASE_URL`, `API_BASE_URL`, `API_TIMEOUT`, `BROWSER`, `HEADLESS`, `DEVICE`, `PARALLEL`, `RETRY`, `TIMEOUT`, and `SLOW_MO`. Defaults include SauceDemo as the base URL, Chromium, headless mode, four parallel workers, two retries, a 60-second Cucumber timeout, and no slow motion. Invalid environment/browser names, boolean values, and numeric ranges fail during configuration loading. `cucumber.mjs` reads the worker and retry counts from `config.ts`; npm scripts do not override them.
 - Supported browser names are `chromium`, `firefox`, and `webkit`. `DEVICE` can select a Playwright device profile; without one, the context uses a 1920 × 1080 viewport.
 
 ### Test lifecycle and artifacts
@@ -41,7 +41,7 @@ An end-to-end browser automation framework built with Playwright, TypeScript, an
 - Cucumber hooks in `src/support/hooks.ts` launch one browser for the test run, create a fresh browser context and page for each scenario, and close the page/context after each scenario.
 - Browser contexts record video under `reports/videos/`. On failure, the framework captures a full-page screenshot and retains/attaches the scenario video. Videos from passing scenarios are discarded.
 - Cucumber is configured to discover `features/**/*.feature`, import TypeScript steps and support code, and write summary, HTML, and JSON output under `reports/`.
-- The Cucumber defaults in `cucumber.json` configure four parallel workers and two retries. The retry tag filter is `@flaky or not @smoke`.
+- `cucumber.mjs` configures the Cucumber imports, formatters, and retry tag filter (`@flaky or not @smoke`); worker and retry counts come from `src/support/config.ts`.
 - `npm run report` generates the expanded HTML report at `reports/html-report/index.html` from `reports/cucumber-report.json`; run tests first to create the JSON input.
 
 ## Project layout
@@ -54,7 +54,7 @@ An end-to-end browser automation framework built with Playwright, TypeScript, an
 | `src/support/` | Browser factory, configuration, custom World, and Cucumber hooks |
 | `env/` | Local environment configuration files |
 | `reports/` | Generated Cucumber reports and test artifacts |
-| `cucumber.json` | Cucumber feature discovery, imports, formatters, parallelism, and retry defaults |
+| `cucumber.mjs` | Cucumber feature discovery, imports, formatters, and retry filter |
 | `tsconfig.json` | TypeScript compiler configuration |
 
 ## Getting started
@@ -73,17 +73,17 @@ Playwright browsers must be installed in the local environment for the selected 
 | Command | Purpose |
 | --- | --- |
 | `npm test` | Run the Cucumber suite with the configured defaults |
-| `npm run test:chrome` | Run Chromium scenarios with four workers |
-| `npm run test:firefox` | Run Firefox scenarios with four workers |
-| `npm run test:webkit` | Run WebKit scenarios with four workers |
-| `npm run test:mobile:ios` | Run WebKit with the configured iPhone 15 Pro device profile |
-| `npm run test:mobile:android` | Run Chromium with the configured Pixel 7 device profile |
+| `npm run test:chrome:parallel` | Run Chromium scenarios using the configured worker count |
+| `npm run test:firefox:parallel` | Run Firefox scenarios using the configured worker count |
+| `npm run test:webkit:parallel` | Run WebKit scenarios using the configured worker count |
+| `npm run test:mobile:ios:parallel` | Run WebKit with the configured iPhone 15 Pro device profile |
+| `npm run test:mobile:android:parallel` | Run Chromium with the configured Pixel 7 device profile |
 | `npm run test:headed` | Run with the browser visible |
 | `npm run test:chrome:smoke` | Run scenarios tagged `@smoke` in Chromium |
-| `npm run test:chrome:negative` | Run scenarios tagged `@negative` in Chromium with four workers |
+| `npm run test:chrome:negative` | Run scenarios tagged `@negative` in Chromium using the configured worker count |
 | `npm run test:chrome:checkout` | Run scenarios tagged `@checkout` in Chromium |
-| `npm run test:retry` | Run in Chromium with two retries |
-| `npm run test:ci` | Run in Chromium with four workers and two retries |
+| `npm run test:retry` | Run in Chromium using the configured retry count |
+| `npm run test:ci` | Run in Chromium using the configured worker and retry counts |
 | `npm run test:dev` | Run using the `dev` environment |
 | `npm run test:qa` | Run using the `qa` environment |
 | `npm run test:staging` | Run using the `staging` environment |

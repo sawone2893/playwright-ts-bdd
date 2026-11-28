@@ -2,29 +2,123 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 import * as fs from 'fs';
 
-export type Environment = 'dev' | 'qa' | 'staging' | 'prod' | 'local';
-export type BrowserType = 'chromium' | 'firefox' | 'webkit';
+const environments = ['dev', 'qa', 'staging', 'prod', 'local'] as const;
+const browsers = ['chromium', 'firefox', 'webkit'] as const;
 
-// 1. Determine active environment (CLI flag takes precedence, defaults to 'qa')
-const activeEnv: Environment = (process.env.ENV as Environment) || 'qa';
+export type Environment = (typeof environments)[number];
+export type BrowserType = (typeof browsers)[number];
 
-// 2. Resolve paths pointing inside the env/ directory
-const rootDir = process.cwd();
-const envDirPath = path.resolve(rootDir, 'env');
+const parseEnum = <T extends string>(
+  name: string,
+  value: string | undefined,
+  allowedValues: readonly T[],
+  fallback: T,
+): T => {
+  const normalized = value === undefined ? fallback : value.trim().toLowerCase();
+  const match = allowedValues.find((allowedValue) => allowedValue === normalized);
+
+  if (!match) {
+    throw new Error(
+      `Invalid configuration: ${name} must be one of ${allowedValues.join(', ')}; received "${value}".`,
+    );
+  }
+
+  return match;
+};
+
+const activeEnv = parseEnum('ENV', process.env.ENV, environments, 'qa');
+const envDirPath = path.resolve(process.cwd(), 'env');
 const baseEnvPath = path.resolve(envDirPath, '.env');
 const targetEnvPath = path.resolve(envDirPath, `.env.${activeEnv}`);
 
-// 3. Load default fallback env if it exists
-if (fs.existsSync(baseEnvPath)) {
-  dotenv.config({ path: baseEnvPath });
+const readEnvFile = (filePath: string): Record<string, string> =>
+  fs.existsSync(filePath) ? dotenv.parse(fs.readFileSync(filePath)) : {};
+
+if (!fs.existsSync(targetEnvPath)) {
+  console.warn(`[Config] Warning: Environment file not found at ${targetEnvPath}. Using available defaults.`);
 }
 
-// 4. Load the target environment file (e.g., env/.env.qa), overriding defaults
-if (fs.existsSync(targetEnvPath)) {
-  dotenv.config({ path: targetEnvPath, override: true });
-} else {
-  console.warn(`[Config] Warning: Environment file not found at ${targetEnvPath}. Using process defaults.`);
-}
+const fileEnvironment = {
+  ...readEnvFile(baseEnvPath),
+  ...readEnvFile(targetEnvPath),
+};
+delete fileEnvironment.ENV;
+
+const processEnvironment = { ...process.env };
+delete processEnvironment.ENV;
+
+const values: NodeJS.ProcessEnv = {
+  ...fileEnvironment,
+  ...processEnvironment,
+};
+
+const getString = (name: string, fallback: string): string => {
+  const value = values[name];
+  if (value === undefined) return fallback;
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    throw new Error(`Invalid configuration: ${name} must not be empty.`);
+  }
+
+  return trimmed;
+};
+
+const getOptionalString = (name: string): string | undefined => {
+  const value = values[name];
+  if (value === undefined) return undefined;
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    throw new Error(`Invalid configuration: ${name} must not be empty.`);
+  }
+
+  return trimmed;
+};
+
+const getBoolean = (name: string, fallback: boolean): boolean => {
+  const value = values[name];
+  if (value === undefined) return fallback;
+
+  switch (value.trim().toLowerCase()) {
+    case 'true':
+      return true;
+    case 'false':
+      return false;
+    default:
+      throw new Error(`Invalid configuration: ${name} must be "true" or "false"; received "${value}".`);
+  }
+};
+
+const getInteger = (name: string, fallback: number, minimum: number): number => {
+  const value = values[name];
+  if (value === undefined) return fallback;
+
+  const normalized = value.trim();
+  const parsed = Number(normalized);
+  if (!normalized || !Number.isSafeInteger(parsed) || parsed < minimum) {
+    throw new Error(
+      `Invalid configuration: ${name} must be a whole number greater than or equal to ${minimum}; received "${value}".`,
+    );
+  }
+
+  return parsed;
+};
+
+const getNonNegativeNumber = (name: string, fallback: number): number => {
+  const value = values[name];
+  if (value === undefined) return fallback;
+
+  const normalized = value.trim();
+  const parsed = Number(normalized);
+  if (!normalized || !Number.isFinite(parsed) || parsed < 0) {
+    throw new Error(
+      `Invalid configuration: ${name} must be a non-negative number; received "${value}".`,
+    );
+  }
+
+  return parsed;
+};
 
 export interface AppConfig {
   env: Environment;
@@ -40,27 +134,16 @@ export interface AppConfig {
   slowMo: number;
 }
 
-const toBoolean = (val: string | undefined, fallback: boolean): boolean => {
-  if (val === undefined) return fallback;
-  return val.toLowerCase() === 'true';
-};
-
-const toNumber = (val: string | undefined, fallback: number): number => {
-  if (val === undefined) return fallback;
-  const parsed = parseInt(val, 10);
-  return isNaN(parsed) ? fallback : parsed;
-};
-
 export const config: AppConfig = {
   env: activeEnv,
-  baseUrl: process.env.BASE_URL || 'https://www.saucedemo.com',
-  apiBaseUrl: process.env.API_BASE_URL || 'https://jsonplaceholder.typicode.com',
-  apiTimeout: toNumber(process.env.API_TIMEOUT, 15000),
-  browser: (process.env.BROWSER as BrowserType) || 'chromium',
-  headless: toBoolean(process.env.HEADLESS, true),
-  device: process.env.DEVICE,
-  parallelWorkers: toNumber(process.env.PARALLEL, 4),
-  retryCount: toNumber(process.env.RETRY, 0),
-  defaultTimeout: toNumber(process.env.TIMEOUT, 60000),
-  slowMo: toNumber(process.env.SLOW_MO, 0),
+  baseUrl: getString('BASE_URL', 'https://www.saucedemo.com'),
+  apiBaseUrl: getString('API_BASE_URL', 'https://jsonplaceholder.typicode.com'),
+  apiTimeout: getInteger('API_TIMEOUT', 15000, 1),
+  browser: parseEnum('BROWSER', values.BROWSER, browsers, 'chromium'),
+  headless: getBoolean('HEADLESS', true),
+  device: getOptionalString('DEVICE'),
+  parallelWorkers: getInteger('PARALLEL', 4, 1),
+  retryCount: getInteger('RETRY', 2, 0),
+  defaultTimeout: getInteger('TIMEOUT', 60000, 1),
+  slowMo: getNonNegativeNumber('SLOW_MO', 0),
 };

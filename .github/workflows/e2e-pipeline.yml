@@ -49,8 +49,8 @@ jobs:
       - name: Install Project Dependencies
         run: npm ci
 
-      - name: Verify Browser Launch Options
-        run: npm run test:browser-options
+      - name: Run Unit Tests
+        run: npm run test:unit
 
       - name: Install Playwright Browsers & OS Dependencies
         run: npx playwright install --with-deps ${{ matrix.browser }}

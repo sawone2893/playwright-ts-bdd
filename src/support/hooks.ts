@@ -1,7 +1,6 @@
 import {
   Before,
   After,
-  BeforeAll,
   AfterAll,
   Status,
   setDefaultTimeout,
@@ -14,14 +13,11 @@ import { BrowserFactory } from "./browser-factory";
 import { config } from "./config";
 import { PageManager } from "../pageObjectFactory/PageManager";
 import { ApiManager } from "../api/ApiManager";
+import { getScenarioResources } from "./scenario-resources";
 
 setDefaultTimeout(config.defaultTimeout);
 
-let browser: Browser;
-
-BeforeAll(async function () {
-  browser = await BrowserFactory.getBrowser();
-});
+let browser: Browser | undefined;
 
 AfterAll(async function () {
   if (browser) {
@@ -30,24 +26,28 @@ AfterAll(async function () {
 });
 
 Before(async function (this: CustomWorld,scenario) {
+  const tags = scenario.pickle.tags.map((tag) => tag.name);
+  const resources = getScenarioResources(tags);
 
-  // 1. Initialize API context for all scenarios (supports @api and hybrid UI+API tests)
- this.apiContext = await request.newContext({
-    baseURL: config.apiBaseUrl,
-    extraHTTPHeaders: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-  });
-  this.apiManager = new ApiManager(this.apiContext);
+  if (resources.api) {
+    this.apiContext = await request.newContext({
+      baseURL: config.apiBaseUrl,
+      extraHTTPHeaders: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    });
+    this.apiManager = new ApiManager(this.apiContext);
+  }
 
-  // 2. Skip browser initialization for @api-only scenarios
-  const isApiOnly = scenario.pickle.tags.some((tag) => tag.name === "@api");
-  if (isApiOnly) {
+  if (!resources.browser) {
     return;
   }
 
-  // 3. Initialize Browser Context, Tracing, and PageManager for UI / Hybrid tests
+  if (!browser) {
+    browser = await BrowserFactory.getBrowser();
+  }
+
   this.browser = browser;
   const contextOptions = BrowserFactory.getContextOptions();
   this.context = await browser.newContext(contextOptions);

@@ -19,13 +19,13 @@ The UI examples use SauceDemo. The API example uses JSONPlaceholder, and the ifr
 
 - Feature specifications live under `features/`; their step implementations are grouped by area under `src/steps/`.
 - Scenarios use behavior-focused Given/When/Then steps. The login feature uses a Scenario Outline for credential variations, and checkout uses data tables for products, shipping information, and expected order items.
-- Current tags are `@api`, `@auth`, `@checkout`, `@e2e`, `@iframe`, `@negative`, `@positive`, `@regression`, `@smoke`, `@ui`, `@visual`, and `@windows`.
+- Current tags are `@api`, `@api-only`, `@auth`, `@checkout`, `@e2e`, `@iframe`, `@negative`, `@positive`, `@regression`, `@smoke`, `@ui`, `@visual`, and `@windows`. Use `@api` for API scenarios, including hybrid UI/API scenarios; add `@api-only` when the scenario does not need a browser.
 - The Cucumber retry filter is `@flaky or not @smoke`: eligible non-smoke scenarios can be retried, as can scenarios tagged `@flaky`. No current feature is tagged `@flaky`.
 
 ### Scenario state and lifecycle
 
 - `CustomWorld` holds scenario-scoped browser, context, page, page manager, API context, API manager, and last API response references.
-- Cucumber hooks launch a browser once per Cucumber worker, including for API-only runs. Each scenario gets a fresh API request context; scenarios tagged `@api` skip browser-context and page creation. Other scenarios get a fresh browser context and page.
+- Cucumber hooks launch a browser lazily once per worker when the first browser-backed scenario runs. Scenarios tagged `@api` get a fresh API request context and browser context/page, supporting hybrid UI/API tests. Scenarios tagged `@api-only` get an API context but no browser; scenarios without either API tag do not create an API context.
 - Each UI context starts Playwright tracing. On failure, the hooks save a trace and screenshot, retain and attach the video, and attach the last API response body when available. Passing-scenario videos are deleted. Contexts and pages are closed after each scenario.
 - Cucumber's default step timeout comes from `TIMEOUT` (60,000 ms fallback). The shared UI assertion helpers use a 5,000 ms fallback; API requests use `API_TIMEOUT` (15,000 ms fallback).
 
@@ -37,7 +37,7 @@ The UI examples use SauceDemo. The API example uses JSONPlaceholder, and the ifr
 
 ### API layer
 
-- A Playwright `APIRequestContext` is created for each scenario and configured with `API_BASE_URL`.
+- A Playwright `APIRequestContext` is created for each `@api` or `@api-only` scenario and configured with `API_BASE_URL`.
 - `BaseApiClient` provides GET, POST, PUT, PATCH, and DELETE requests, per-request timeout overrides, request timing/status logs, and shared status/JSON helpers.
 - `UserService` currently exposes `GET /users/:id`, `POST /users`, and `DELETE /users/:id`. The feature examples exercise GET and POST only.
 - `ApiAssertions` provides status, success, header, JSON-property, and array-size assertions. Request and response types are in `src/api/models/user.model.ts`.
@@ -91,7 +91,7 @@ npm exec -- tsc --noEmit
 | Command | Purpose |
 | --- | --- |
 | `npm test` | Run the default Cucumber suite; its `pretest` hook first removes screenshots, videos, and traces |
-| `npm run test:browser-options` | Verify each browser receives its supported Playwright launch options |
+| `npm run test:unit` | Run unit tests, including browser launch options and scenario resource selection |
 | `npm run test:chrome:parallel` | Run Chromium scenarios using the configured worker/retry settings |
 | `npm run test:firefox:parallel` | Run Firefox scenarios using the configured worker/retry settings |
 | `npm run test:webkit:parallel` | Run WebKit scenarios using the configured worker/retry settings |
@@ -181,6 +181,7 @@ These files contain application settings only; do not put the `ENV` selector in 
 | `src/support/browser-factory.ts` | Browser launch, device context options, viewport, and video recording |
 | `src/support/custom-world.ts` | Cucumber World state for UI and API scenarios |
 | `src/support/hooks.ts` | Browser/API setup and teardown, tracing, failure artifacts, and Cucumber timeout |
+| `src/support/scenario-resources.ts` | Resolves API and browser requirements from scenario tags |
 | `src/support/page-holder.ts` | Mutable active-page reference shared by page objects |
 | `src/base/BasePage.ts` | Shared Playwright navigation, frame/window, action, wait, and assertion operations |
 | `src/pageObjectFactory/PageManager.ts` | Lazy access to the page objects |
@@ -206,5 +207,6 @@ These files contain application settings only; do not put the `ENV` selector in 
 | File | Purpose |
 | --- | --- |
 | `tests/browser-factory.test.ts` | Verifies the launch options passed to Chromium, Firefox, and WebKit, plus the video-recording setting |
+| `tests/scenario-resources.test.ts` | Verifies UI, hybrid API/UI, and API-only resource selection |
 
-`reports/` is generated at runtime and ignored by Git. `node_modules/` is installed from the package manifests and is not part of the framework source. The focused browser-factory regression test runs with `npm run test:browser-options`; no separate lint command is currently defined.
+`reports/` is generated at runtime and ignored by Git. `node_modules/` is installed from the package manifests and is not part of the framework source. Unit tests run with `npm run test:unit`; no separate lint command is currently defined.

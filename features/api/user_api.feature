@@ -1,4 +1,4 @@
-@api
+@api @api-only
 Feature: User API Management
 
   Scenario: Retrieve an existing user by ID
